@@ -1,0 +1,530 @@
+/* ROG-Inspired Premium Desktop UI - Dark Mode & Scaled Down */
+
+:root {
+    /* Base Colors - Dark Theme */
+    --rog-bg-light: #050505;
+    /* Deep Black */
+    --rog-bg-gradient-start: #0a0a0a;
+    --rog-bg-gradient-end: #000000;
+    --rog-panel-white: rgba(20, 20, 20, 0.95);
+    /* Dark Panel */
+    --rog-panel-border: rgba(255, 255, 255, 0.08);
+
+    /* Accents */
+    --rog-red: #ff0a3e;
+    --rog-red-glow: rgba(255, 10, 62, 0.15);
+    /* Reduced glow intensity */
+    --rog-border: rgba(255, 255, 255, 0.08);
+
+    /* Text */
+    --rog-text-dark: #e5e5e5;
+    /* Off-white for main text */
+    --rog-text-light: #ffffff;
+    --rog-text-dim: #9ca3af;
+    /* Gray for subtitles */
+
+    /* Shadows for Depth (Adjusted for Dark Mode) */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.6);
+    --shadow-red: 0 5px 15px rgba(255, 10, 62, 0.2);
+
+    /* Spacing Variables - Scaled Up for Zoom */
+    --nav-height: 80px;
+    /* Increased back from 64px */
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 18px;
+    /* Increased base font size (default 16px) */
+}
+
+/* === BODY & CONTAINER === */
+html,
+body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100vh;
+    scrollbar-width: thin;
+    scrollbar-color: var(--rog-red) var(--rog-bg-light);
+}
+
+body {
+    font-family: 'Inter', 'Rajdhani', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--rog-text-dark);
+    position: relative;
+    background: #000000;
+    display: block;
+    /* Ensure it overrides any flex centering from unwanted sources */
+    /* Fallback */
+    /* Dark Grid Pattern */
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    /* Larger grid */
+    min-height: 100vh;
+}
+
+/* Main content wrapper */
+#root {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* --- Layout Utilities --- */
+.rog-container-wide {
+    width: 100%;
+    margin: 0;
+    padding: 0 24px;
+    /* Minimal padding for edge breathing room */
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+}
+
+.rog-section {
+    margin-bottom: 40px;
+    width: 100%;
+}
+
+/* --- Navigation Bar (Fixed & Full Width) --- */
+header,
+.rog-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--nav-height);
+    background: rgba(10, 10, 10, 0.95);
+    /* Dark Navbar */
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--rog-border);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    /* Match container padding */
+    box-sizing: border-box;
+    box-shadow: var(--shadow-sm);
+}
+
+/* --- Components --- */
+
+/* Buttons */
+.rog-btn-primary {
+    position: relative;
+    padding: 14px 32px;
+    /* Increased padding */
+    background: linear-gradient(135deg, var(--rog-red) 0%, #aa0020 100%);
+    border: none;
+    color: white;
+    font-size: 1.1rem;
+    /* Increased font size */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-red);
+    white-space: nowrap;
+}
+
+.rog-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 10, 62, 0.3);
+    background: linear-gradient(135deg, #ff2a55 0%, #cc002a 100%);
+}
+
+.rog-btn-secondary {
+    padding: 10px 24px;
+    /* Increased padding */
+    background: transparent;
+    border: 1px solid var(--rog-red);
+    color: var(--rog-red);
+    font-size: 1rem;
+    /* Increased font size */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    transition: all 0.2s;
+}
+
+.rog-btn-secondary:hover {
+    background: rgba(255, 10, 62, 0.1);
+    box-shadow: 0 0 10px rgba(255, 10, 62, 0.2);
+    transform: translateY(-1px);
+    text-shadow: 0 0 5px rgba(255, 10, 62, 0.5);
+}
+
+/* Panels with Dark Technical Look */
+.rog-panel-dark {
+    background: var(--rog-panel-white);
+    border: 1px solid var(--rog-panel-border);
+    border-left: 3px solid var(--rog-red);
+    padding: 32px;
+    /* Increased padding */
+    position: relative;
+    box-shadow: var(--shadow-md);
+    border-radius: 4px;
+    /* Slightly more rounded */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.rog-panel-dark:hover {
+    border-color: rgba(255, 10, 62, 0.5);
+    /* Stronger Red Border */
+    box-shadow: 0 0 25px rgba(255, 10, 62, 0.25);
+    /* Enhanced Red Glow */
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+/* Inputs */
+.rog-input-dark,
+.rog-select-dark {
+    background: #0a0a0a;
+    border: 1px solid #333;
+    color: white;
+    padding: 14px 18px;
+    /* Increased padding */
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    /* Increased font size */
+    transition: all 0.2s;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.rog-input-dark:focus,
+.rog-select-dark:focus {
+    border-color: var(--rog-red);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 10, 62, 0.2);
+    background: #111;
+}
+
+/* Stats Blocks */
+.rog-stat-block {
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid var(--rog-border);
+    padding: 20px;
+    /* Reduced padding */
+    text-align: center;
+    position: relative;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-sm);
+    border-radius: 4px;
+}
+
+.rog-stat-block:hover {
+    transform: translateY(-3px);
+    border-color: var(--rog-red);
+    box-shadow: 0 5px 15px rgba(255, 10, 62, 0.1);
+}
+
+.rog-stat-number {
+    font-size: 3.5rem;
+    /* Increased from 2.5rem */
+    font-weight: 800;
+    color: var(--rog-text-dark);
+    /* White number */
+    line-height: 1;
+    margin-bottom: 8px;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.rog-stat-label {
+    font-size: 0.9rem;
+    /* Increased from 0.75rem */
+    color: var(--rog-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+}
+
+/* Hero Typography - Scaled Down */
+.rog-hero-section {
+    padding: 100px 40px 60px;
+    /* Increased padding */
+    text-align: left;
+    /* Default to left align for dashboard */
+}
+
+.rog-hero-title {
+    font-size: 4.5rem;
+    /* Increased from 3rem */
+    font-weight: 900;
+    color: var(--rog-text-dark);
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    margin-bottom: 24px;
+}
+
+.rog-hero-subtitle {
+    font-size: 1.25rem;
+    /* Increased from 1rem */
+    color: var(--rog-text-dim);
+    font-weight: 400;
+    line-height: 1.6;
+    margin: 0;
+}
+
+
+/* Inventory Cards */
+.rog-inventory-card {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid var(--rog-border);
+    border-radius: 4px;
+    padding: 16px;
+    /* Reduced padding */
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.rog-inventory-card:hover {
+    background: rgba(30, 30, 30, 0.8);
+    border-color: var(--rog-red);
+    transform: translateY(-3px);
+}
+
+.rog-blood-type {
+    font-size: 1.5rem;
+    /* Reduced from 2rem */
+    font-weight: 800;
+    color: var(--rog-text-dark);
+    margin-bottom: 8px;
+}
+
+.rog-progress-container {
+    background: #222;
+    height: 4px;
+    /* Thinner bar */
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.rog-progress-bar {
+    height: 100%;
+    background: var(--rog-red);
+    box-shadow: 0 0 8px rgba(255, 10, 62, 0.5);
+}
+
+/* Request List */
+.rog-request-item {
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid var(--rog-border);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.rog-request-item:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(30, 30, 30, 0.6);
+}
+
+.rog-status-badge {
+    padding: 4px 8px;
+    border-radius: 2px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.rog-status-badge.pending {
+    background: rgba(234, 179, 8, 0.1);
+    color: #facc15;
+    border: 1px solid rgba(234, 179, 8, 0.2);
+}
+
+.rog-status-badge.approved {
+    background: rgba(22, 163, 74, 0.1);
+    color: #4ade80;
+    border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.rog-status-badge.rejected {
+    background: rgba(220, 38, 38, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+/* Toast Notification (Dark) */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.toast {
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid #333;
+    border-left: 3px solid #333;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    color: white;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    min-width: 280px;
+    animation: slideIn 0.3s ease-out forwards;
+}
+
+.toast.hiding {
+    animation: slideOut 0.3s ease-in forwards;
+}
+
+.toast.success {
+    border-left-color: #10b981;
+}
+
+.toast.error {
+    border-left-color: #ef4444;
+}
+
+.toast.warning {
+    border-left-color: #f59e0b;
+}
+
+.toast-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.toast-message {
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Helper Utility */
+.rog-glow-text-dark {
+    color: var(--rog-text-dark);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* Dashboard Grid Layout (User) */
+.rog-dashboard-layout {
+    display: grid;
+    grid-template-columns: minmax(400px, 1fr) minmax(500px, 1.5fr);
+    gap: 4rem;
+    /* Fluid gap */
+    align-items: start;
+    padding-top: 80px;
+    padding-bottom: 40px;
+    width: 100%;
+}
+
+@media (max-width: 1100px) {
+    .rog-dashboard-layout {
+        grid-template-columns: 1fr;
+        /* Stack on smaller screens / high zoom */
+        gap: 3rem;
+    }
+}
+
+/* Dashboard Grid Layout (Admin/General) */
+.rog-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    /* Fluid gap */
+    width: 100%;
+}
+
+/* Admin Horizontal Stack Layout */
+.rog-dashboard-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+}
+
+.rog-inventory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.rog-inventory-list .rog-inventory-card {
+    display: grid;
+    grid-template-columns: 80px 1fr 100px;
+    /* Horizontal row layout */
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 0;
+    text-align: left;
+    padding: 20px 32px;
+    background: rgba(20, 20, 20, 0.6);
+    border: 1px solid var(--rog-border);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.rog-inventory-list .rog-inventory-card:hover {
+    background: rgba(30, 30, 30, 0.8);
+    border-color: var(--rog-red);
+    transform: translateX(4px);
+    /* Slight shift right instead of up */
+}
+
+.rog-inventory-list .rog-blood-type {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--rog-red);
+    text-shadow: 0 0 10px rgba(255, 10, 62, 0.4);
+}
+
+.rog-requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
