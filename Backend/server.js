@@ -16,6 +16,7 @@ const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
 app.use('/api/inventory', require('./routes/inventoryRoutes'));
 app.use('/api/camps', require('./routes/campRoutes'));
+app.use('/api/ai', require('./routes/aiRoutes'));
 
 // Test Route
 app.get('/', (req, res) => {

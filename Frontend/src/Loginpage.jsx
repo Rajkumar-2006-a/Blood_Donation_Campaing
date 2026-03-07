@@ -17,7 +17,7 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:5000/api/auth/login', {
+            const response = await fetch('http://localhost:5001/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -29,17 +29,11 @@ function Login() {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
 
-                // Smooth fade transition instead of alert
-                document.body.style.opacity = '0';
-                document.body.style.transition = 'opacity 0.3s ease-out';
-
-                setTimeout(() => {
-                    if (data.user.role === 'admin') {
-                        navigate('/admin');
-                    } else {
-                        navigate('/dashboard');
-                    }
-                }, 300);
+                if (data.user.role === 'admin') {
+                    navigate('/admin');
+                } else {
+                    navigate('/dashboard');
+                }
             } else {
                 alert(data.message || 'Login failed');
             }
@@ -62,6 +56,7 @@ function Login() {
             <div className="login-container">
                 <div className="login-card">
                     <div className="login-header">
+                        <h1 className="login-brand">One <span style={{ color: '#ff3333', textShadow: '0 0 20px rgba(255, 0, 0, 0.9), 0 0 40px rgba(255, 0, 0, 0.6)' }}>Drop</span></h1>
                         <div className="logo-icon"></div>
                         <h2>Sign In</h2>
                         <p>Access your account</p>

@@ -1,22 +1,31 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import ChatBot from "./ChatBot";
 import "./ROG.css";
 
 function UserDashboard() {
     const [user, setUser] = useState(null);
-    const [searchResults, setSearchResults] = useState([]);
-    const [searchCity, setSearchCity] = useState("");
-    const [searchBloodGroup, setSearchBloodGroup] = useState("");
-    const [loading, setLoading] = useState(false);
     const [showCampForm, setShowCampForm] = useState(false);
     const [toasts, setToasts] = useState([]);
     const [campForm, setCampForm] = useState({
         institution_name: '',
         location: '',
         camp_date: '',
-        contact_person: ''
+        camp_time: '',
+        contact_person: '',
+        contact_mobile: ''
     });
     const navigate = useNavigate();
+
+    // Generate Blood Rain Drops
+    const drops = useMemo(() => {
+        return Array.from({ length: 50 }).map((_, i) => ({
+            id: i,
+            left: Math.random() * 100 + "vw",
+            animationDuration: Math.random() * 2 + 1 + "s",
+            animationDelay: Math.random() * 2 + "s"
+        }));
+    }, []);
 
     // Toast notification system
     const showToast = (message, type = 'success', title = '') => {
@@ -26,6 +35,7 @@ function UserDashboard() {
 
         setTimeout(() => {
             setToasts(prev => prev.map(t => t.id === id ? { ...t, hiding: true } : t));
+
             setTimeout(() => {
                 setToasts(prev => prev.filter(t => t.id !== id));
             }, 300);
@@ -47,40 +57,10 @@ function UserDashboard() {
         navigate("/login");
     };
 
-    const handleSearch = async () => {
-        if (!searchBloodGroup || !searchCity) {
-            showToast('Please select blood group and enter city', 'warning', 'Missing Info');
-            return;
-        }
-
-        setLoading(true);
-        try {
-            const query = new URLSearchParams({
-                blood_group: searchBloodGroup,
-                city: searchCity
-            }).toString();
-
-            const response = await fetch(`http://localhost:5000/api/inventory/search?${query}`);
-            const data = await response.json();
-            setSearchResults(data);
-
-            if (data.length === 0) {
-                showToast('No donors found matching your criteria', 'warning', 'No Results');
-            } else {
-                showToast(`Found ${data.length} donor(s) in ${searchCity}`, 'success', 'Search Complete');
-            }
-        } catch (error) {
-            console.error(error);
-            showToast('Failed to search donors. Please try again.', 'error', 'Search Failed');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const handleCampSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:5000/api/camps', {
+            const response = await fetch('http://localhost:5001/api/camps', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(campForm)
@@ -89,7 +69,7 @@ function UserDashboard() {
             if (response.ok) {
                 showToast('Your camp request has been submitted for review', 'success', 'Request Submitted');
                 setShowCampForm(false);
-                setCampForm({ institution_name: '', location: '', camp_date: '', contact_person: '' });
+                setCampForm({ institution_name: '', location: '', camp_date: '', camp_time: '', contact_person: '', contact_mobile: '' });
             } else {
                 showToast('Failed to submit request. Please try again.', 'error', 'Submission Failed');
             }
@@ -102,9 +82,40 @@ function UserDashboard() {
     if (!user) return null;
 
     return (
-        <div className="rog-main-content">
+        <div className="rog-dashboard-container" style={{
+            background: '#050505',
+            backgroundImage: `
+                linear-gradient(rgba(255, 10, 62, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 10, 62, 0.03) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+            fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+        }}>
 
-            {/* Toast Container */}
+            {/* ===== CINEMATIC GLOW EFFECTS ===== */}
+            <div style={{
+                position: 'fixed', top: '-30%', left: '-20%', width: '60%', height: '60%',
+                background: 'radial-gradient(circle, rgba(255,10,62,0.07) 0%, transparent 70%)',
+                filter: 'blur(80px)', zIndex: 0, pointerEvents: 'none'
+            }} />
+            <div style={{
+                position: 'fixed', bottom: '-30%', right: '-20%', width: '60%', height: '60%',
+                background: 'radial-gradient(circle, rgba(255,10,62,0.05) 0%, transparent 70%)',
+                filter: 'blur(80px)', zIndex: 0, pointerEvents: 'none'
+            }} />
+
+            {/* ===== BLOOD RAIN ===== */}
+            <div className="blood-rain-container">
+                {drops.map((drop) => (
+                    <div key={drop.id} className="drop" style={{
+                        left: drop.left,
+                        animationDuration: drop.animationDuration,
+                        animationDelay: drop.animationDelay
+                    }} />
+                ))}
+            </div>
+
+            {/* ===== TOAST NOTIFICATIONS ===== */}
             <div className="toast-container">
                 {toasts.map(toast => (
                     <div key={toast.id} className={`toast ${toast.type} ${toast.hiding ? 'hiding' : ''}`}>
@@ -121,349 +132,339 @@ function UserDashboard() {
                 ))}
             </div>
 
-            {/* --- TOP HEADER --- */}
-            <header className="rog-navbar">
+            {/* ===== NAVBAR ===== */}
+            <header className="rog-navbar" style={{
+                background: 'rgba(5,5,5,0.8)', backdropFilter: 'blur(12px)',
+                borderBottom: '1px solid rgba(255,255,255,0.05)'
+            }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{
-                        width: '28px',
-                        height: '28px',
-                        background: 'linear-gradient(135deg, var(--rog-red) 0%, #aa0020 100%)',
-                        clipPath: 'polygon(0 0, 100% 0, 70% 100%, 0 100%)',
-                        boxShadow: '0 0 10px rgba(255, 10, 62, 0.4)'
-                    }}></div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: '800', letterSpacing: '0.5px', color: 'var(--rog-text-dark)' }}>
-                        One Drop
-                    </div>
+                        width: '28px', height: '28px', background: 'var(--rog-red)',
+                        borderRadius: '4px', boxShadow: '0 0 15px rgba(255,10,62,0.5)'
+                    }} />
+                    <span style={{ fontSize: '1.15rem', fontWeight: '800', color: 'white', letterSpacing: '-0.5px' }}>
+                        One <span style={{ color: 'var(--rog-red)' }}>Drop</span>
+                    </span>
                 </div>
-                <button onClick={handleLogout} className="rog-btn-secondary" style={{ padding: '8px 20px', fontSize: '0.9rem' }}>
+                <button onClick={handleLogout} style={{
+                    background: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    color: '#9ca3af', padding: '8px 24px', fontSize: '0.75rem',
+                    fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1.5px',
+                    borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s',
+                    fontFamily: 'inherit'
+                }}>
                     LOGOUT
                 </button>
             </header>
 
-            {/* --- MAIN CONTENT GRID --- */}
-            <section className="rog-container-wide">
-                <div className="rog-dashboard-layout">
+            {/* ===== MAIN CONTENT ===== */}
+            <div className="rog-main-content-flex">
+                <div className="rog-split-layout">
 
-                    {/* LEFT: Hero Section */}
-                    <div className="anim-slide-up" style={{ position: 'sticky', top: '100px' }}>
-                        <div style={{
-                            fontSize: '1rem',
-                            fontWeight: '600',
-                            color: 'var(--rog-red)',
-                            letterSpacing: '2px',
-                            marginBottom: '12px',
-                            textTransform: 'uppercase'
+                    {/* ======== LEFT SIDE ======== */}
+                    <div className="rog-left-section">
+
+                        {/* BIG HEADLINE */}
+                        <h1 className="rog-marketing-headline" style={{
+                            fontSize: '5.5rem', fontWeight: '900',
+                            color: '#ff0a3e',
+                            textShadow: '0 0 40px rgba(255,10,62,0.35)',
+                            lineHeight: '1', marginBottom: '40px',
+                            letterSpacing: '-3px', margin: '0 0 40px 0',
+                            fontFamily: "'Inter', sans-serif"
                         }}>
-                            Welcome Back, {user.name}
-                        </div>
-                        <h1 className="rog-hero-title">
-                            CONNECT.<br />
-                            DONATE.<br />
-                            <span style={{ color: 'var(--rog-red)' }}>SAVE LIVES.</span>
+                            SAVE LIVES.
                         </h1>
-                        <p className="rog-hero-subtitle" style={{ marginBottom: '32px' }}>
+
+                        {/* SUBTITLE */}
+                        <p className="rog-marketing-sub" style={{
+                            fontSize: '1.25rem', color: '#9ca3af',
+                            lineHeight: '1.8', marginBottom: '40px', maxWidth: '600px', margin: '0 0 40px 0'
+                        }}>
                             Join the elite network of donors via One Drop. Your contribution powers the future of healthcare.
                         </p>
-                        <p className="rog-hero-subtitle" style={{ marginBottom: '32px', fontSize: '1.5rem', fontWeight: '700' }}>
-                            <span style={{ color: 'var(--rog-red)' }}>உங்கள் ரத்ததானம்,</span> <span style={{ color: '#ffffff' }}>மற்றொருவர் வாழ்க்கையின் ஒளி</span>
-                        </p>
 
-                        {/* Stats */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '32px' }}>
-                            <div className="rog-stat-block">
-                                <div className="rog-stat-number">12</div>
-                                <div className="rog-stat-label">Donations</div>
-                            </div>
-                            <div className="rog-stat-block">
-                                <div className="rog-stat-number">45</div>
-                                <div className="rog-stat-label">Lives Saved</div>
-                            </div>
-                            <div className="rog-stat-block">
-                                <div className="rog-stat-number">{user.blood_group}</div>
-                                <div className="rog-stat-label">My Type</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* RIGHT: Profile & Find Donors */}
-                    <div style={{ display: 'grid', gap: '32px', paddingLeft: '40px' }}> {/* Increased gap from 24px */}
-
-                        {/* Profile Overview */}
-                        <div className="rog-panel-dark anim-slide-up" style={{ animationDelay: '0.1s', padding: '32px' }}> {/* Increased padding from 24px */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}> {/* Reduced margin */}
-                                <h2 style={{ fontSize: '1.25rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--rog-text-dark)' }}>
-                                    Profile
-                                </h2>
-                                <span style={{
-                                    color: '#10b981',
-                                    fontWeight: '700',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '1px',
-                                    fontSize: '0.85rem'
-                                }}>
-                                    ● ACTIVE DONOR
-                                </span>
-                            </div>
-
-                            <div style={{ display: 'grid', gap: '16px' }}> {/* Reduced gap */}
-                                <div>
-                                    <label style={{
-                                        color: 'var(--rog-text-dim)',
-                                        textTransform: 'uppercase',
-                                        fontSize: '0.8rem',
-                                        letterSpacing: '1px',
-                                        fontWeight: '600'
-                                    }}>Full Name</label>
-                                    <div style={{ fontSize: '1.2rem', fontWeight: '500', marginTop: '2px', color: 'var(--rog-text-light)' }}>{user.name}</div>
-                                </div>
-                                <div>
-                                    <label style={{
-                                        color: 'var(--rog-text-dim)',
-                                        textTransform: 'uppercase',
-                                        fontSize: '0.8rem',
-                                        letterSpacing: '1px',
-                                        fontWeight: '600'
-                                    }}>Email Address</label>
-                                    <div style={{ fontSize: '1rem', fontFamily: 'monospace', color: '#d1d5db', marginTop: '2px' }}>
-                                        {user.email}
-                                    </div>
-                                </div>
-                                <div>
-                                    <label style={{
-                                        color: 'var(--rog-text-dim)',
-                                        textTransform: 'uppercase',
-                                        fontSize: '0.8rem',
-                                        letterSpacing: '1px',
-                                        fontWeight: '600'
-                                    }}>Location</label>
-                                    <div style={{ fontSize: '1rem', marginTop: '2px', color: 'var(--rog-text-light)' }}>{user.city || 'Not Specified'}</div>
-                                </div>
-                            </div>
-
-                            <div style={{
-                                marginTop: '24px', /* Reduced margin */
-                                padding: '12px', /* Reduced padding */
-                                background: 'rgba(255, 10, 62, 0.08)',
-                                border: '1px dashed rgba(255, 10, 62, 0.3)',
-                                borderRadius: '4px'
-                            }}>
-                                <div style={{ color: 'var(--rog-red)', fontWeight: '700', marginBottom: '4px', fontSize: '0.85rem' }}>
-                                    Need assistance?
-                                </div>
-                                <p style={{ fontSize: '0.85rem', color: '#9ca3af', lineHeight: '1.5', margin: 0 }}>
-                                    Contact our support team for help with donation appointments.
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Find Donors */}
-                        <div className="rog-panel-dark anim-slide-up" style={{ animationDelay: '0.2s', padding: '24px' }}> {/* Adjusted padding for consistency */}
-                            <h2 style={{
-                                fontSize: '1.25rem',
-                                fontWeight: '800',
-                                textTransform: 'uppercase',
-                                marginBottom: '8px',
-                                letterSpacing: '0.5px',
-                                color: 'var(--rog-text-dark)'
-                            }}>Find Donors</h2>
-                            <p style={{ color: '#9ca3af', marginBottom: '24px', fontSize: '0.9rem' }}>
-                                Search the database for available blood donors in your city.
-                            </p>
-
-                            <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-                                gap: '12px',
-                                marginBottom: '24px'
-                            }}>
-                                <select
-                                    value={searchBloodGroup}
-                                    onChange={(e) => setSearchBloodGroup(e.target.value)}
-                                    className="rog-select-dark"
-                                >
-                                    <option value="">Select Group</option>
-                                    <option value="A+">A+</option>
-                                    <option value="A-">A-</option>
-                                    <option value="B+">B+</option>
-                                    <option value="B-">B-</option>
-                                    <option value="AB+">AB+</option>
-                                    <option value="AB-">AB-</option>
-                                    <option value="O+">O+</option>
-                                    <option value="O-">O-</option>
-                                </select>
-                                <input
-                                    type="text"
-                                    placeholder="Enter City Name..."
-                                    value={searchCity}
-                                    onChange={(e) => setSearchCity(e.target.value)}
-                                    className="rog-input-dark"
-                                />
-                                <button onClick={handleSearch} className="rog-btn-primary">
-                                    {loading ? '...' : 'SEARCH'}
-                                </button>
-                            </div>
-
-                            {/* Search Results */}
-                            <div style={{ minHeight: '150px' }}>
-                                {loading && <div style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: '0.9rem' }}>Scanning database...</div>}
-
-                                {!loading && searchResults.length > 0 && (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-                                        {searchResults.map(donor => (
-                                            <div key={donor.id} style={{
-                                                background: 'rgba(255,255,255,0.03)',
-                                                padding: '12px',
-                                                border: '1px solid rgba(255,255,255,0.08)',
-                                                borderRadius: '4px',
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                transition: 'all 0.2s'
-                                            }}
-                                                onMouseEnter={(e) => {
-                                                    e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
-                                                    e.currentTarget.style.borderColor = 'rgba(255, 10, 62, 0.3)';
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                                                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                                                }}
-                                            >
-                                                <div>
-                                                    <div style={{ fontWeight: '700', marginBottom: '2px', color: 'var(--rog-text-light)', fontSize: '0.95rem' }}>{donor.name}</div>
-                                                    <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>
-                                                        {donor.city} • {donor.phone}
-                                                    </div>
-                                                </div>
-                                                <div style={{
-                                                    fontSize: '1.2rem',
-                                                    fontWeight: '900',
-                                                    color: 'var(--rog-red)',
-                                                    textShadow: '0 0 10px rgba(255, 10, 62, 0.3)'
-                                                }}>
-                                                    {donor.blood_group}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                {!loading && searchResults.length === 0 && (
-                                    <div style={{
-                                        color: '#555',
-                                        fontStyle: 'italic',
-                                        borderTop: '1px solid rgba(255,255,255,0.05)',
-                                        paddingTop: '16px',
-                                        fontSize: '0.9rem'
-                                    }}>
-                                        No active search.
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </section>
-
-            {/* --- CAMPAIGN CTA --- */}
-            <section className="rog-container-wide rog-section anim-slide-up" style={{ animationDelay: '0.3s' }}>
-                <div className="rog-panel-dark" style={{
-                    padding: '32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '24px'
-                }}>
-                    <div style={{ flex: '1 1 400px', maxWidth: '600px' }}>
-                        <h2 style={{
-                            fontSize: '1.75rem',
-                            fontWeight: '800',
-                            textTransform: 'uppercase',
-                            marginBottom: '12px',
-                            letterSpacing: '0.5px',
-                            color: 'var(--rog-text-light)'
+                        {/* TAMIL TEXT */}
+                        <p className="rog-tamil-text" style={{
+                            fontSize: '1.4rem', fontWeight: '700',
+                            lineHeight: '1.8', marginBottom: '80px', color: '#e5e5e5',
+                            margin: '0 0 80px 0'
                         }}>
-                            Organize a Blood Camp
-                        </h2>
-                        <p style={{ fontSize: '0.95rem', color: '#9ca3af', lineHeight: '1.5' }}>
-                            Host a donation drive at your institution. We provide full logistics support and medical staff. Make a massive impact today.
+                            <span style={{ color: '#ff0a3e', fontStyle: 'italic' }}>உங்கள் இரத்தம்,</span>{' '}
+                            ஒருவரின் உயிர்.<br />
+                            இரத்த தானம் செய்வோம்! உயிரைக் காப்போம்!
                         </p>
-                    </div>
-                    <button onClick={() => setShowCampForm(true)} className="rog-btn-primary" style={{
-                        padding: '12px 36px',
-                        fontSize: '1rem'
-                    }}>
-                        START REQUEST
-                    </button>
-                </div>
-            </section>
 
-            {/* Camp Request Modal */}
+                        {/* ===== STATS CARDS ===== */}
+                        <div className="rog-stats-minimal-row" style={{
+                            display: 'flex', gap: '30px', marginBottom: '80px', padding: '10px 0'
+                        }}>
+                            {[
+                                { value: user.donations_count || 1, label: 'DONATIONS' },
+                                { value: '45', label: 'LIVES SAVED' },
+                                { value: user.blood_group || 'B+', label: 'MY TYPE' }
+                            ].map((stat, i) => (
+                                <div key={i} className="rog-stat-minimal" style={{
+                                    background: 'linear-gradient(145deg, rgba(25, 25, 25, 0.9), rgba(10, 10, 10, 0.8))',
+                                    backdropFilter: 'blur(20px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    borderRadius: '16px',
+                                    width: '200px', height: '160px', /* Bigger boxes */
+                                    display: 'flex', flexDirection: 'column',
+                                    justifyContent: 'center', alignItems: 'center',
+                                    position: 'relative', overflow: 'hidden',
+                                    boxShadow: '0 10px 40px rgba(0,0,0,0.5)', /* Classy shadow */
+                                    transition: 'all 0.3s ease',
+                                    cursor: 'default'
+                                }}>
+                                    {/* Top glow line */}
+                                    <div style={{
+                                        position: 'absolute', top: 0, left: 0, width: '100%', height: '2px',
+                                        background: 'linear-gradient(90deg, transparent, var(--rog-red), transparent)'
+                                    }} />
+                                    {/* Glass overlay */}
+                                    <div style={{
+                                        position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                                        background: 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 100%)',
+                                        pointerEvents: 'none'
+                                    }} />
+                                    <div style={{
+                                        fontSize: '3.5rem', fontWeight: '800', color: 'white',
+                                        lineHeight: '1', marginBottom: '10px',
+                                        textShadow: '0 0 20px rgba(255,10,62,0.3)'
+                                    }}>{stat.value}</div>
+                                    <div style={{
+                                        fontSize: '0.9rem', fontWeight: '700',
+                                        textTransform: 'uppercase', letterSpacing: '2px',
+                                        color: '#9ca3af'
+                                    }}>{stat.label}</div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* ===== ORGANIZE CAMP SECTION ===== */}
+                        <div className="rog-camp-text-section">
+                            <h2 style={{
+                                fontSize: '1.4rem', fontWeight: '800',
+                                textTransform: 'uppercase', color: 'white',
+                                marginBottom: '10px', letterSpacing: '0.5px',
+                                margin: '0 0 10px 0'
+                            }}>
+                                Organize a Blood Camp
+                            </h2>
+                            <p style={{
+                                fontSize: 'x-large', color: '#6b7280',
+                                maxWidth: '1000px', lineHeight: '1.6',
+                                margin: '0 0 20px 0'
+                            }}>
+                                Host a donation drive at your institution. We provide full logistics support and medical staff. Make a massive impact today.
+                            </p>
+                            <button
+                                onClick={() => setShowCampForm(true)}
+                                style={{
+                                    background: 'linear-gradient(180deg, #d30026 0%, #8a0019 100%)',
+                                    color: 'white', border: 'none',
+                                    padding: '14px 50px', fontSize: '0.85rem',
+                                    fontWeight: '700', textTransform: 'uppercase',
+                                    letterSpacing: '2px', borderRadius: '8px',
+                                    boxShadow: '0 8px 20px rgba(0,0,0,0.5), 0 0 20px rgba(255,0,40,0.3)',
+                                    cursor: 'pointer', transition: 'all 0.2s',
+                                    fontFamily: 'inherit',
+                                    marginTop: '10px'
+                                }}
+                                onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
+                                onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
+                            >
+                                START REQUEST
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* ======== RIGHT SIDE: AI STATION ======== */}
+                    <div className="rog-right-section">
+
+                        {/* Base Glow */}
+                        <div style={{
+                            position: 'absolute', bottom: '-5px', left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: '70%', height: '10px',
+                            background: 'var(--rog-red)', filter: 'blur(25px)',
+                            zIndex: 0, opacity: 0.5
+                        }} />
+
+                        {/* AI Station Container */}
+                        <div className="rog-ai-station" style={{
+                            position: 'relative',
+                            /* Background Image with Dark Overlay */
+                            background: `linear-gradient(rgba(5, 5, 5, 0.4), rgba(5, 5, 5, 0.7)), url('/Backgrund.png') center/cover no-repeat`,
+                            border: '1px solid rgba(255, 10, 62, 0.4)',
+                            borderRadius: '24px',
+                            borderBottomLeftRadius: 0, /* TOUCH BUTTON */
+                            borderBottomRightRadius: 0, /* TOUCH BUTTON */
+                            borderBottom: 'none',
+                            overflow: 'hidden',
+                            boxShadow: '0 0 60px rgba(255,10,62,0.12), inset 0 0 30px rgba(255,10,62,0.08)',
+                            display: 'flex', flexDirection: 'column',
+                            height: '100%',
+                            minHeight: '600px',
+                            backdropFilter: 'blur(20px)',
+                            animation: 'pulse-border 4s infinite'
+                        }}>
+
+                            {/* Station Header with Title + Robot */}
+                            <div style={{
+                                padding: '24px 28px 0',
+                                display: 'flex',
+                                justifyContent: 'center', /* CENTERED */
+                                alignItems: 'center',
+                                position: 'relative', zIndex: 2
+                            }}>
+                                <div style={{
+                                    fontSize: '1.5rem', fontWeight: '900', color: 'white',
+                                    lineHeight: '1.25', letterSpacing: '1px',
+                                    textTransform: 'uppercase', textAlign: 'center',
+                                    textShadow: '0 0 20px rgba(255, 10, 62, 0.5)',
+                                    fontFamily: "'Inter', sans-serif",
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '12px'
+                                }}>
+                                    <span style={{ fontSize: '1.4rem', filter: 'drop-shadow(0 0 8px rgba(255,10,62,0.6))' }}>❤️</span>
+                                    <span>AI Blood Assistant</span>
+                                    <svg width="60" height="24" viewBox="0 0 60 24" fill="none" stroke="#ff0a3e" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 0 5px rgba(255,10,62,0.6))' }}>
+                                        <path d="M0 12h10l5-8 10 16 5-8h10l5-4 5 4h10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            {/* Robot Image Area */}
+                            <div style={{
+                                display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                padding: '10px 0', position: 'relative', zIndex: 1,
+                                height: '220px', flexShrink: 0
+                            }}>
+                                <img
+                                    src="/ai_logo.png" alt="AI Assistant"
+                                    style={{
+                                        maxHeight: '200px', objectFit: 'contain',
+                                        filter: 'drop-shadow(0 0 25px rgba(255,10,62,0.35))',
+                                        borderRadius: '12px'
+                                    }}
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                    }}
+                                />
+                                {/* REMOVED BANNER AS REQUESTED */}
+                            </div>
+
+                            {/* BloodAssistant Label */}
+                            <div style={{
+                                padding: '8px 24px',
+                                display: 'flex', alignItems: 'center', gap: '10px'
+                            }}>
+                                <div style={{
+                                    width: '28px', height: '28px', borderRadius: '50%',
+                                    background: '#10b981', boxShadow: '0 0 8px #10b981',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    overflow: 'hidden', flexShrink: 0
+                                }}>
+                                    <img src="/ai_logo.png" alt="AI" style={{
+                                        width: '100%', height: '100%', objectFit: 'cover'
+                                    }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerText = '🤖'; }} />
+                                </div>
+                                <span style={{
+                                    fontWeight: '700', color: 'white', fontSize: '0.95rem'
+                                }}>BloodAssistant</span>
+                            </div>
+
+                            {/* Chat Area (fills remaining space) */}
+                            <div style={{
+                                flex: 1, display: 'flex', flexDirection: 'column',
+                                borderTop: '1px solid rgba(255,255,255,0.06)',
+                                minHeight: 0
+                            }}>
+                                <ChatBot />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* ===== CAMP FORM MODAL ===== */}
             {showCampForm && (
                 <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'rgba(0, 0, 0, 0.85)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 2000,
-                    backdropFilter: 'blur(8px)'
+                    position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+                    background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
+                    zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
-                    <div className="rog-panel-dark" style={{ width: '500px', maxWidth: '90vw', padding: '32px' }}>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '24px', textTransform: 'uppercase', color: 'var(--rog-text-light)' }}>
-                            REQUEST FORM
-                        </h2>
-                        <form onSubmit={handleCampSubmit} style={{ display: 'grid', gap: '16px' }}>
-                            <input
-                                type="text"
-                                placeholder="Institution Name"
-                                className="rog-input-dark"
+                    <div style={{
+                        background: '#111', border: '1px solid rgba(255,10,62,0.3)',
+                        borderRadius: '16px', padding: '36px', width: '500px', maxWidth: '900vw',
+                        boxShadow: '0 0 50px rgba(255,10,62,0.1)'
+                    }}>
+                        <h3 style={{
+                            color: 'white', fontSize: 'medium', marginBottom: '24px',
+                            fontWeight: '1000', margin: '0 0 24px 0'
+                        }}>
+                            🏥 Organize a Blood Camp
+                        </h3>
+                        <form onSubmit={handleCampSubmit} style={{
+                            display: 'flex', flexDirection: 'column', gap: '14px'
+                        }}>
+                            <input type="text" placeholder="Institution Name" className="rog-input-dark"
                                 value={campForm.institution_name}
-                                onChange={e => setCampForm({ ...campForm, institution_name: e.target.value })}
-                                required
-                            />
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                                <input
-                                    type="text"
-                                    placeholder="Location/City"
-                                    className="rog-input-dark"
-                                    value={campForm.location}
-                                    onChange={e => setCampForm({ ...campForm, location: e.target.value })}
-                                    required
-                                />
-                                <input
-                                    type="date"
-                                    className="rog-input-dark"
+                                onChange={e => setCampForm({ ...campForm, institution_name: e.target.value })} required />
+                            <input type="text" placeholder="Location / Address" className="rog-input-dark"
+                                value={campForm.location}
+                                onChange={e => setCampForm({ ...campForm, location: e.target.value })} required />
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                                <input type="date" className="rog-input-dark"
                                     value={campForm.camp_date}
                                     onChange={e => setCampForm({ ...campForm, camp_date: e.target.value })}
-                                    required
-                                    style={{ colorSchem: 'dark' }}
-                                />
+                                    required style={{ colorScheme: 'dark' }} />
+                                <input type="text" placeholder="Time (e.g. 10AM - 3PM)" className="rog-input-dark"
+                                    value={campForm.camp_time}
+                                    onChange={e => setCampForm({ ...campForm, camp_time: e.target.value })} required />
                             </div>
-                            <input
-                                type="text"
-                                placeholder="Contact Person"
-                                className="rog-input-dark"
-                                value={campForm.contact_person}
-                                onChange={e => setCampForm({ ...campForm, contact_person: e.target.value })}
-                                required
-                            />
-                            <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-                                <button type="submit" className="rog-btn-primary" style={{ flex: 1 }}>SUBMIT</button>
-                                <button type="button" onClick={() => setShowCampForm(false)} className="rog-btn-secondary" style={{ flex: 1 }}>
-                                    CANCEL
-                                </button>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                                <input type="text" placeholder="Contact Person" className="rog-input-dark"
+                                    value={campForm.contact_person}
+                                    onChange={e => setCampForm({ ...campForm, contact_person: e.target.value })} required />
+                                <input type="tel" placeholder="Mobile Number" className="rog-input-dark"
+                                    value={campForm.contact_mobile}
+                                    onChange={e => setCampForm({ ...campForm, contact_mobile: e.target.value })}
+                                    required pattern="[0-9]{10}" title="10 digit mobile number" />
+                            </div>
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                <button type="submit" style={{
+                                    flex: 1, background: 'var(--rog-red)', color: 'white',
+                                    border: 'none', padding: '12px', borderRadius: '8px',
+                                    fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer',
+                                    fontFamily: 'inherit'
+                                }}>SUBMIT</button>
+                                <button type="button" onClick={() => setShowCampForm(false)} style={{
+                                    flex: 1, background: 'transparent',
+                                    border: '1px solid rgba(255,255,255,0.15)',
+                                    color: '#9ca3af', padding: '12px', borderRadius: '8px',
+                                    fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer',
+                                    fontFamily: 'inherit'
+                                }}>CANCEL</button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
 
+            {/* Animations */}
+            <style>{`
+                @keyframes pulse-border {
+                    0% { border-color: rgba(255,10,62,0.35); box-shadow: 0 0 60px rgba(255,10,62,0.12), inset 0 0 30px rgba(255,10,62,0.08); }
+                    50% { border-color: rgba(255,10,62,0.65); box-shadow: 0 0 80px rgba(255,10,62,0.2), inset 0 0 40px rgba(255,10,62,0.12); }
+                    100% { border-color: rgba(255,10,62,0.35); box-shadow: 0 0 60px rgba(255,10,62,0.12), inset 0 0 30px rgba(255,10,62,0.08); }
+                }
+            `}</style>
         </div>
     );
 }

@@ -22,7 +22,7 @@ exports.register = async (req, res) => {
 
         // Insert user
         const [result] = await db.query(
-            'INSERT INTO users (name, email, password, blood_group, location, contact, is_donor, is_admin) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO users (name, email, password, blood_group, location, contact, is_donor, is_admin, donations_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)',
             [name, email, hashedPassword, blood_group, city, phone, is_donor, is_admin]
         );
 
@@ -70,7 +70,8 @@ exports.login = async (req, res) => {
                 role: role,
                 blood_group: user.blood_group,
                 city: user.location, // Map back for frontend
-                phone: user.contact
+                phone: user.contact,
+                donations_count: user.donations_count || 0
             }
         });
     } catch (error) {

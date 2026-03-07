@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS users (
     location VARCHAR(100),
     contact VARCHAR(15),
     is_donor BOOLEAN DEFAULT FALSE,
-    is_admin BOOLEAN DEFAULT FALSE
+    is_admin BOOLEAN DEFAULT FALSE,
+    donations_count INT DEFAULT 0
 );
 
 -- Camp Requests Table (User provided)
@@ -31,7 +32,9 @@ CREATE TABLE IF NOT EXISTS camp_requests (
     institution_name VARCHAR(100) NOT NULL,
     location VARCHAR(100) NOT NULL,
     camp_date DATE NOT NULL,
+    camp_time VARCHAR(50),  -- Added time field
     contact_person VARCHAR(100) NOT NULL,
+    contact_mobile VARCHAR(15), -- Added mobile number
     status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending'
 );
 
@@ -41,6 +44,18 @@ CREATE TABLE IF NOT EXISTS inventory (
     blood_group ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-') NOT NULL,
     units INT DEFAULT 0,
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Attendance Table
+CREATE TABLE IF NOT EXISTS attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    camp_id INT NOT NULL,
+    user_id INT NOT NULL,
+    status ENUM('Present', 'Absent') DEFAULT 'Absent',
+    marked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (camp_id) REFERENCES camp_requests(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE(camp_id, user_id)
 );
 `;
 

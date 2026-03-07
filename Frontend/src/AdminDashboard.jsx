@@ -55,7 +55,7 @@ function AdminDashboard() {
 
     const loadCampRequests = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/camps');
+            const response = await fetch('http://localhost:5001/api/camps');
             if (!response.ok) throw new Error("API Error");
             const data = await response.json();
             setCampRequests(data);
@@ -72,7 +72,7 @@ function AdminDashboard() {
     const fetchAllDonors = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:5000/api/auth/users');
+            const response = await fetch('http://localhost:5001/api/auth/users');
             const data = await response.json();
             setSearchResults(data);
         } catch (error) {
@@ -85,11 +85,62 @@ function AdminDashboard() {
 
     // Alias handleSearch to fetchAllDonors for simplicity in the UI if needed, 
     // or just call fetchAllDonors directly.
+    // Alias handleSearch to fetchAllDonors
     const handleSearch = fetchAllDonors;
+
+    // --- Attendance Logic ---
+    const [showAttendanceModal, setShowAttendanceModal] = useState(false);
+    const [selectedCamp, setSelectedCamp] = useState(null);
+    const [campDonors, setCampDonors] = useState([]);
+
+    const openAttendanceModal = async (camp) => {
+        setSelectedCamp(camp);
+        setShowAttendanceModal(true);
+        setCampDonors([]); // Clear previous
+        try {
+            const response = await fetch(`http://localhost:5001/api/camps/${camp.id}/donors`);
+            if (response.ok) {
+                const data = await response.json();
+                setCampDonors(data);
+            } else {
+                showToast('Failed to load donors', 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('Error loading donors', 'error');
+        }
+    };
+
+    const handleMarkAttendance = async (donorId, status) => {
+        try {
+            const response = await fetch('http://localhost:5001/api/camps/attendance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    campId: selectedCamp.id,
+                    userId: donorId,
+                    status: status
+                })
+            });
+
+            if (response.ok) {
+                showToast(`Marked as ${status}`, 'success');
+                // Update local state by mapping over the existing campDonors
+                setCampDonors(prev => prev.map(d =>
+                    d.id === donorId ? { ...d, attendance_status: status } : d
+                ));
+            } else {
+                showToast('Failed to mark attendance', 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('Error marking attendance', 'error');
+        }
+    };
 
     const loadInventory = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/inventory');
+            const response = await fetch('http://localhost:5001/api/inventory');
             if (!response.ok) throw new Error("API Error");
             const data = await response.json();
             setInventory(data);
@@ -111,7 +162,7 @@ function AdminDashboard() {
         setCampRequests(prev => prev.map(req => req.id === id ? { ...req, status } : req));
 
         try {
-            await fetch(`http://localhost:5000/api/camps/${id}`, {
+            await fetch(`http://localhost:5001/api/camps/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status })
@@ -126,7 +177,7 @@ function AdminDashboard() {
     const handleInventoryUpdate = async (e) => {
         e.preventDefault();
         try {
-            await fetch('http://localhost:5000/api/inventory/update', {
+            await fetch('http://localhost:5001/api/inventory/update', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(inventoryForm)
@@ -181,8 +232,8 @@ function AdminDashboard() {
                         clipPath: 'polygon(0 0, 100% 0, 70% 100%, 0 100%)',
                         boxShadow: '0 0 10px rgba(255, 10, 62, 0.4)'
                     }}></div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '900', letterSpacing: '1px', color: 'var(--rog-text-dark)' }}>
-                        One Drop
+                    <div style={{ fontSize: '1.5rem', fontWeight: '800', letterSpacing: '1px', fontFamily: "'Orbitron', sans-serif" }}>
+                        <span style={{ color: '#ffffff' }}>One</span> <span style={{ color: '#ff3333', textShadow: '0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.4)' }}>Drop</span>
                         <span style={{
                             fontSize: '0.9rem',
                             color: 'white',
@@ -192,7 +243,8 @@ function AdminDashboard() {
                             marginLeft: '12px',
                             fontWeight: '700',
                             letterSpacing: '1px',
-                            verticalAlign: 'middle'
+                            verticalAlign: 'middle',
+                            fontFamily: "'Inter', sans-serif"
                         }}>
                             ADMIN
                         </span>
@@ -283,9 +335,22 @@ function AdminDashboard() {
                                         </span>
                                     </div>
                                     <div style={{ fontSize: '0.9rem', color: '#999' }}>
-                                        {new Date(request.camp_date).toLocaleDateString()} • {request.location} • {request.contact_person}
+                                        {new Date(request.camp_date).toLocaleDateString()} • {request.camp_time || 'Time TBD'} • {request.location}
+                                    </div>
+                                    <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
+                                        Contact: {request.contact_person}
                                     </div>
                                 </div>
+
+                                {request.status === 'Approved' && (
+                                    <button
+                                        onClick={() => openAttendanceModal(request)}
+                                        className="rog-btn-secondary"
+                                        style={{ padding: '6px 12px', fontSize: '0.8rem', marginLeft: '12px', whiteSpace: 'nowrap' }}
+                                    >
+                                        Manage Attendance
+                                    </button>
+                                )}
 
                                 {request.status === 'Pending' && (
                                     <div style={{ display: 'flex', gap: '8px' }}>
@@ -389,7 +454,7 @@ function AdminDashboard() {
                                             onClick={async () => {
                                                 if (window.confirm(`Are you sure you want to delete donor ${donor.name}?`)) {
                                                     try {
-                                                        await fetch(`http://localhost:5000/api/auth/users/${donor.id}`, { method: 'DELETE' });
+                                                        await fetch(`http://localhost:5001/api/auth/users/${donor.id}`, { method: 'DELETE' });
                                                         showToast('Donor deleted successfully', 'success');
                                                         handleSearch(); // Reload list
                                                     } catch (err) {
@@ -482,6 +547,79 @@ function AdminDashboard() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+
+            {/* Attendance Modal */}
+            {showAttendanceModal && selectedCamp && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(5px)',
+                    zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                    <div className="rog-panel-dark" style={{ width: '700px', maxWidth: '90vw', maxHeight: '85vh', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                            <div>
+                                <h2 style={{ fontSize: '1.25rem', margin: 0, color: '#fff' }}>Attendance</h2>
+                                <p style={{ margin: '4px 0 0 0', color: '#999', fontSize: '0.9rem' }}>{selectedCamp.institution_name} • {new Date(selectedCamp.camp_date).toLocaleDateString()}</p>
+                            </div>
+                            <button onClick={() => setShowAttendanceModal(false)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '2rem', cursor: 'pointer', lineHeight: '0.5' }}>&times;</button>
+                        </div>
+
+                        <div style={{ display: 'grid', gap: '8px', overflowY: 'auto', paddingRight: '4px' }}>
+                            {campDonors.length === 0 ? (
+                                <p style={{ color: '#999', textAlign: 'center', padding: '20px' }}>No eligible donors found for this camp.</p>
+                            ) : (
+                                campDonors.map(donor => (
+                                    <div key={donor.id} style={{
+                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                        padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: '6px',
+                                        border: '1px solid rgba(255,255,255,0.05)'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            <div style={{
+                                                width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,10,62,0.1)',
+                                                color: 'var(--rog-red)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                fontWeight: 'bold', border: '1px solid rgba(255,10,62,0.3)'
+                                            }}>
+                                                {donor.blood_group}
+                                            </div>
+                                            <div>
+                                                <div style={{ fontWeight: '600', color: '#eee' }}>{donor.name}</div>
+                                                <div style={{ fontSize: '0.85rem', color: '#888' }}>{donor.email}</div>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button
+                                                onClick={() => handleMarkAttendance(donor.id, 'Present')}
+                                                style={{
+                                                    padding: '6px 16px', borderRadius: '4px', border: 'none', cursor: 'pointer',
+                                                    background: donor.attendance_status === 'Present' ? '#10b981' : 'rgba(255,255,255,0.05)',
+                                                    color: donor.attendance_status === 'Present' ? '#000' : '#888',
+                                                    fontWeight: '700', transition: 'all 0.2s', textTransform: 'uppercase', fontSize: '0.8rem'
+                                                }}
+                                            >
+                                                Present
+                                            </button>
+                                            <button
+                                                onClick={() => handleMarkAttendance(donor.id, 'Absent')}
+                                                style={{
+                                                    padding: '6px 16px', borderRadius: '4px', border: 'none', cursor: 'pointer',
+                                                    background: donor.attendance_status === 'Absent' ? '#ef4444' : 'rgba(255,255,255,0.05)',
+                                                    color: donor.attendance_status === 'Absent' ? '#000' : '#888',
+                                                    fontWeight: '700', transition: 'all 0.2s', textTransform: 'uppercase', fontSize: '0.8rem'
+                                                }}
+                                            >
+                                                Absent
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
