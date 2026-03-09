@@ -40,9 +40,9 @@ exports.updateCampStatus = async (req, res) => {
             [status, id]
         );
 
-        // If Approved, send email to all eligible donors (anyone with is_donor=1)
+        // If Approved, send email to all eligible donors (anyone with is_donor=1 and a gmail address)
         if (status === 'Approved') {
-            const [donors] = await db.query('SELECT email FROM users WHERE is_donor = 1');
+            const [donors] = await db.query("SELECT email FROM users WHERE is_donor = 1 AND email LIKE '%@gmail.com'");
             const [camp] = await db.query('SELECT * FROM camp_requests WHERE id = ?', [id]);
 
             if (donors.length > 0 && camp.length > 0) {

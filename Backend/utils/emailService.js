@@ -1,89 +1,57 @@
-const nodemailer = require('nodemailer');
+const emailjs = require('@emailjs/nodejs');
 const dotenv = require('dotenv');
 dotenv.config();
 
-// Create a transporter
-// NOTE: For real email sending, USER needs to provide valid credentials in .env
-// For now, these are placeholders or will fall back to Ethereal if not provided
-// Create a transporter
-// NOTE: For real email sending, USER needs to provide valid credentials in .env
-// We wrap this in a helper or check env vars to avoid crashing if they are missing
-let transporter = null;
-try {
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-        transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
-    } else {
-        console.warn("Email service: EMAIL_USER or EMAIL_PASS not set. Emails will not be sent.");
-    }
-} catch (err) {
-    console.error("Failed to create email transporter:", err);
+// Initialize EmailJS with Public and Private Keys
+if (process.env.EMAILJS_PUBLIC_KEY && process.env.EMAILJS_PRIVATE_KEY) {
+  emailjs.init({
+    publicKey: process.env.EMAILJS_PUBLIC_KEY,
+    privateKey: process.env.EMAILJS_PRIVATE_KEY,
+  });
+} else {
+  console.warn("EmailJS keys missing in .env. Emails will not be sent.");
 }
 
 const sendCampNotification = async (recipients, campDetails) => {
-    if (!transporter) {
-        console.warn("Email service not configured (missing credentials). Skipping email notification.");
-        return;
-    }
-    if (!recipients || recipients.length === 0) return;
+  if (!process.env.EMAILJS_SERVICE_ID || !process.env.EMAILJS_TEMPLATE_ID) {
+    console.warn("EmailJS Service ID or Template ID missing. Skipping email notification.");
+    return;
+  }
+  if (!recipients || recipients.length === 0) return;
 
-    // Join emails for BCC to avoid exposing all emails
-    const bccList = recipients.join(',');
+  const formattedDate = new Date(campDetails.camp_date).toLocaleDateString('en-IN', {
+    weekday: 'short', year: 'numeric', month: 'long', day: 'numeric'
+  });
 
-    const mailOptions = {
-        from: `"Blood Donation Camp" <${process.env.EMAIL_USER}>`,
-        to: process.env.EMAIL_USER, // Send to self, BCC everyone else
-        bcc: bccList,
-        subject: `Upcoming Blood Donation Camp: ${campDetails.institution_name}!`,
-        html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-                <h1 style="color: #d9534f; text-align: center;">Upcoming Blood Donation Camp!</h1>
-                <p>Dear Donor,</p>
-                <p>We are organizing a blood donation camp and would love to see you there!</p>
-                
-                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <p><strong>🏥 Camp Name:</strong> ${campDetails.institution_name}</p>
-                    <p><strong>📅 Date:</strong> ${campDetails.camp_date}</p>
-                    <p><strong>⏰ Time:</strong> ${campDetails.camp_time || '10:00 AM - 3:00 PM'}</p>
-                    <p><strong>📍 Location:</strong> ${campDetails.location}</p>
-                    <p><strong>📞 Contact:</strong> ${campDetails.contact_person}</p>
-                </div>
+  // Helper to pause execution
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-                <p>Please join us and make a difference! Your donation can save lives.</p>
-
-                <div style="text-align: center; margin: 30px 0;">
-                    <a href="#" style="background-color: #d9534f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">CONFIRM YOUR ATTENDANCE ></a>
-                </div>
-                
-                <div style="text-align: center; margin-top: 20px;">
-                    <img src="cid:campImage" alt="Blood Donation" style="width: 100%; max-width: 500px; border-radius: 8px;">
-                </div>
-
-                <p style="text-align: center; color: #777; font-size: 12px; margin-top: 20px;">Thank you for your support!</p>
-            </div>
-        `,
-        attachments: [
-            {
-                filename: 'camp_image.jpg',
-                path: __dirname + '/../camp_image.jpg',
-                cid: 'campImage' // same cid value as in the html img src
-            }
-        ]
+  // Send sequentially to avoid "Too many concurrent requests" from Gmail
+  for (const recipientEmail of recipients) {
+    const templateParams = {
+      to_email: recipientEmail,
+      institution_name: campDetails.institution_name,
+      camp_date: formattedDate,
+      camp_time: campDetails.camp_time || '10:00 AM – 3:00 PM',
+      location: campDetails.location,
+      contact_person: campDetails.contact_person,
+      contact_mobile: campDetails.contact_mobile || 'N/A'
     };
 
     try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Email sent: ' + info.response);
-        return info;
+      const response = await emailjs.send(
+        process.env.EMAILJS_SERVICE_ID,
+        process.env.EMAILJS_TEMPLATE_ID,
+        templateParams
+      );
+      console.log('EmailJS sent to ' + recipientEmail + ' | Status: ' + response.status);
     } catch (error) {
-        console.error('Error sending email:', error);
-        // Don't crash the server if email fails
+      console.error('EmailJS Error sending to ' + recipientEmail + ':', error);
     }
+
+    // Wait 500ms before sending the next email to prevent rate limiting
+    await delay(500);
+  }
 };
 
 module.exports = { sendCampNotification };
