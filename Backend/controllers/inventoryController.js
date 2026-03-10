@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 exports.getInventory = async (req, res) => {
     try {
-        const [inventory] = await db.query('SELECT * FROM inventory ORDER BY blood_group');
+        const [inventory] = await db.query('SELECT * FROM inventory ORDER BY hospital_name, blood_group');
         res.json(inventory);
     } catch (error) {
         console.error(error);
@@ -37,18 +37,22 @@ exports.searchDonors = async (req, res) => {
 };
 
 exports.updateInventory = async (req, res) => {
-    const { blood_group, units } = req.body;
+    const { hospital_name, blood_group, units } = req.body;
+
+    if (!hospital_name) {
+        return res.status(400).json({ message: 'Hospital Name is required' });
+    }
 
     try {
-        // Check if blood group exists
-        const [existing] = await db.query('SELECT * FROM inventory WHERE blood_group = ?', [blood_group]);
+        // Check if blood group exists for the hospital
+        const [existing] = await db.query('SELECT * FROM inventory WHERE hospital_name = ? AND blood_group = ?', [hospital_name, blood_group]);
 
         if (existing.length > 0) {
             // Update existing
-            await db.query('UPDATE inventory SET units = ? WHERE blood_group = ?', [units, blood_group]);
+            await db.query('UPDATE inventory SET units = ? WHERE hospital_name = ? AND blood_group = ?', [units, hospital_name, blood_group]);
         } else {
             // Insert new
-            await db.query('INSERT INTO inventory (blood_group, units) VALUES (?, ?)', [blood_group, units]);
+            await db.query('INSERT INTO inventory (hospital_name, blood_group, units) VALUES (?, ?, ?)', [hospital_name, blood_group, units]);
         }
 
         res.json({ message: 'Inventory updated successfully' });

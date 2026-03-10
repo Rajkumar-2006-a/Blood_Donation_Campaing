@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS camp_requests (
 -- Inventory Table (kept for feature)
 CREATE TABLE IF NOT EXISTS inventory (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    hospital_name VARCHAR(100) DEFAULT 'Central Bank',
     blood_group ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-') NOT NULL,
     units INT DEFAULT 0,
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

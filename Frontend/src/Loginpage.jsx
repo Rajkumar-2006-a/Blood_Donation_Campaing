@@ -1,6 +1,7 @@
 import "./Loginpage.css";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useGoogleLogin } from '@react-oauth/google';
 
 function Login() {
     // State
@@ -10,8 +11,22 @@ function Login() {
     const navigate = useNavigate();
 
     const [error, setError] = useState("");
-
     const [showPassword, setShowPassword] = useState(false);
+    const [toasts, setToasts] = useState([]);
+
+    // Toast notification system
+    const showToast = (message, type = 'success', title = '') => {
+        const id = Date.now();
+        const toast = { id, message, type, title: title || (type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'Info') };
+        setToasts(prev => [...prev, toast]);
+
+        setTimeout(() => {
+            setToasts(prev => prev.map(t => t.id === id ? { ...t, hiding: true } : t));
+            setTimeout(() => {
+                setToasts(prev => prev.filter(t => t.id !== id));
+            }, 300);
+        }, 2000);
+    };
 
     // Handle form submit
     const handleSubmit = async (e) => {
@@ -29,17 +44,20 @@ function Login() {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
 
-                if (data.user.role === 'admin') {
-                    navigate('/admin');
-                } else {
-                    navigate('/dashboard');
-                }
+                showToast('Login Successful!', 'success', 'Welcome');
+                setTimeout(() => {
+                    if (data.user.role === 'admin') {
+                        navigate('/admin');
+                    } else {
+                        navigate('/dashboard');
+                    }
+                }, 1500); // Wait for the animation to show
             } else {
-                alert(data.message || 'Login failed');
+                showToast(data.message || 'Login failed', 'error', 'Error');
             }
         } catch (error) {
             console.error(error);
-            alert('An error occurred during login');
+            showToast('An error occurred during login', 'error', 'Error');
         }
     };
 
@@ -47,12 +65,61 @@ function Login() {
         setShowPassword(!showPassword);
     };
 
-    const handleGoogleLogin = () => {
-        alert("Google Login is currently in development. Please use standard authentication.");
-    };
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                const response = await fetch('http://localhost:5001/api/auth/googleLogin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ access_token: tokenResponse.access_token })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    showToast('Google Login Successful!', 'success', 'Welcome');
+                    setTimeout(() => {
+                        if (data.user.role === 'admin') {
+                            navigate('/admin');
+                        } else {
+                            navigate('/dashboard');
+                        }
+                    }, 1500);
+                } else {
+                    showToast(data.message || 'Google Login failed', 'error', 'Error');
+                }
+            } catch (error) {
+                console.error(error);
+                showToast('An error occurred during Google login', 'error', 'Error');
+            }
+        },
+        onError: () => {
+            showToast('Google Login Failed from popup', 'error', 'Error');
+        }
+    });
 
     return (
         <div className="login-page-wrapper">
+            {/* Toast Container */}
+            <div className="toast-container">
+                {toasts.map(toast => (
+                    <div key={toast.id} className={`toast ${toast.type} ${toast.hiding ? 'hiding' : ''}`}>
+                        <div className="toast-icon">
+                            {toast.type === 'success' && '✓'}
+                            {toast.type === 'error' && '✗'}
+                            {toast.type === 'warning' && '⚠'}
+                        </div>
+                        <div className="toast-content">
+                            <div className="toast-title">{toast.title}</div>
+                            <div className="toast-message">{toast.message}</div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
             <div className="login-container">
                 <div className="login-card">
                     <div className="login-header">

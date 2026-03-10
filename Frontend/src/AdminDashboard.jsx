@@ -8,7 +8,7 @@ function AdminDashboard() {
     const [inventory, setInventory] = useState([]);
     const [showInventoryForm, setShowInventoryForm] = useState(false);
     const [toasts, setToasts] = useState([]);
-    const [inventoryForm, setInventoryForm] = useState({ blood_group: '', units: '' });
+    const [inventoryForm, setInventoryForm] = useState({ hospital_name: '', blood_group: '', units: '' });
 
     // Search State
     const [searchResults, setSearchResults] = useState([]);
@@ -148,10 +148,10 @@ function AdminDashboard() {
             console.error(error);
             // Fallback for demo visualization
             setInventory([
-                { id: 1, blood_group: "A+", units: 45 },
-                { id: 2, blood_group: "O+", units: 80 },
-                { id: 3, blood_group: "B-", units: 12 },
-                { id: 4, blood_group: "AB+", units: 30 },
+                { id: 1, hospital_name: "Central Bank", blood_group: "A+", units: 45 },
+                { id: 2, hospital_name: "Central Bank", blood_group: "O+", units: 80 },
+                { id: 3, hospital_name: "City Hospital", blood_group: "B-", units: 12 },
+                { id: 4, hospital_name: "City Hospital", blood_group: "AB+", units: 30 },
             ]);
         }
     };
@@ -184,7 +184,7 @@ function AdminDashboard() {
             });
             loadInventory();
             setShowInventoryForm(false);
-            setInventoryForm({ blood_group: '', units: '' });
+            setInventoryForm({ hospital_name: '', blood_group: '', units: '' });
             showToast('Inventory stock levels updated', 'success', 'Inventory Updated');
         } catch (error) {
             showToast('Failed to update inventory', 'error', 'Update Failed');
@@ -303,6 +303,9 @@ function AdminDashboard() {
                     <div className="rog-inventory-list">
                         {inventory.length > 0 ? inventory.map(item => (
                             <div key={item.id} className="rog-inventory-card">
+                                <div style={{ fontSize: '0.9rem', color: '#ff3333', fontWeight: '800', textTransform: 'uppercase' }}>
+                                    {item.hospital_name || 'Central Bank'}
+                                </div>
                                 <div className="rog-blood-type">{item.blood_group}</div>
                                 <div className="rog-progress-container">
                                     <div
@@ -515,6 +518,14 @@ function AdminDashboard() {
                     <div className="rog-panel-dark" style={{ width: '400px', maxWidth: '90vw' }}>
                         <h2 style={{ fontSize: '1.25rem', marginBottom: '20px' }}>UPDATE STOCK</h2>
                         <form onSubmit={handleInventoryUpdate} style={{ display: 'grid', gap: '16px' }}>
+                            <input
+                                type="text"
+                                placeholder="Hospital Name"
+                                value={inventoryForm.hospital_name}
+                                onChange={(e) => setInventoryForm({ ...inventoryForm, hospital_name: e.target.value })}
+                                required
+                                className="rog-input-dark"
+                            />
                             <select
                                 value={inventoryForm.blood_group}
                                 onChange={(e) => setInventoryForm({ ...inventoryForm, blood_group: e.target.value })}

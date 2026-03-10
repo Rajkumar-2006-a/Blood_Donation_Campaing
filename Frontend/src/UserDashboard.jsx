@@ -6,6 +6,7 @@ import "./ROG.css";
 function UserDashboard() {
     const [user, setUser] = useState(null);
     const [showCampForm, setShowCampForm] = useState(false);
+    const [showChatbot, setShowChatbot] = useState(true);
     const [toasts, setToasts] = useState([]);
     const [campForm, setCampForm] = useState({
         institution_name: '',
@@ -202,7 +203,7 @@ function UserDashboard() {
                         }}>
                             {[
                                 { value: user.donations_count || 1, label: 'DONATIONS' },
-                                { value: '45', label: 'LIVES SAVED' },
+                                { value: (user.donations_count || 1) * 3, label: 'LIVES SAVED' },
                                 { value: user.blood_group || 'B+', label: 'MY TYPE' }
                             ].map((stat, i) => (
                                 <div key={i} className="rog-stat-minimal" style={{
@@ -282,115 +283,114 @@ function UserDashboard() {
                     </div>
 
                     {/* ======== RIGHT SIDE: AI STATION ======== */}
-                    <div className="rog-right-section">
+                    {showChatbot && (
+                        <div className="rog-right-section">
 
-                        {/* Base Glow */}
-                        <div style={{
-                            position: 'absolute', bottom: '-5px', left: '50%',
-                            transform: 'translateX(-50%)',
-                            width: '70%', height: '10px',
-                            background: 'var(--rog-red)', filter: 'blur(25px)',
-                            zIndex: 0, opacity: 0.5
-                        }} />
-
-                        {/* AI Station Container */}
-                        <div className="rog-ai-station" style={{
-                            position: 'relative',
-                            /* Background Image with Dark Overlay */
-                            background: `linear-gradient(rgba(5, 5, 5, 0.4), rgba(5, 5, 5, 0.7)), url('/Backgrund.png') center/cover no-repeat`,
-                            border: '1px solid rgba(255, 10, 62, 0.4)',
-                            borderRadius: '24px',
-                            borderBottomLeftRadius: 0, /* TOUCH BUTTON */
-                            borderBottomRightRadius: 0, /* TOUCH BUTTON */
-                            borderBottom: 'none',
-                            overflow: 'hidden',
-                            boxShadow: '0 0 60px rgba(255,10,62,0.12), inset 0 0 30px rgba(255,10,62,0.08)',
-                            display: 'flex', flexDirection: 'column',
-                            height: '100%',
-                            minHeight: '600px',
-                            backdropFilter: 'blur(20px)',
-                            animation: 'pulse-border 4s infinite'
-                        }}>
-
-                            {/* Station Header with Title + Robot */}
+                            {/* Base Glow */}
                             <div style={{
-                                padding: '24px 28px 0',
-                                display: 'flex',
-                                justifyContent: 'center', /* CENTERED */
-                                alignItems: 'center',
-                                position: 'relative', zIndex: 2
+                                position: 'absolute', bottom: '-5px', left: '50%',
+                                transform: 'translateX(-50%)',
+                                width: '70%', height: '10px',
+                                background: 'var(--rog-red)', filter: 'blur(25px)',
+                                zIndex: 0, opacity: 0.5
+                            }} />
+
+                            {/* AI Station Container */}
+                            <div className="rog-ai-station" style={{
+                                position: 'relative',
+                                /* Background Image with Dark Overlay */
+                                background: `linear-gradient(rgba(5, 5, 5, 0.4), rgba(5, 5, 5, 0.7)), url('/Backgrund.png') center/cover no-repeat`,
+                                border: '1px solid rgba(255, 10, 62, 0.4)',
+                                borderRadius: '24px',
+                                borderBottomLeftRadius: 0, /* TOUCH BUTTON */
+                                borderBottomRightRadius: 0, /* TOUCH BUTTON */
+                                borderBottom: 'none',
+                                overflow: 'hidden',
+                                boxShadow: '0 0 60px rgba(255,10,62,0.12), inset 0 0 30px rgba(255,10,62,0.08)',
+                                display: 'flex', flexDirection: 'column',
+                                height: '100%',
+                                minHeight: '600px',
+                                backdropFilter: 'blur(20px)',
+                                animation: 'pulse-border 4s infinite'
                             }}>
+
+                                {/* Station Header with Title + Robot */}
                                 <div style={{
-                                    fontSize: '1.5rem', fontWeight: '900', color: 'white',
-                                    lineHeight: '1.25', letterSpacing: '1px',
-                                    textTransform: 'uppercase', textAlign: 'center',
-                                    textShadow: '0 0 20px rgba(255, 10, 62, 0.5)',
-                                    fontFamily: "'Inter', sans-serif",
+                                    padding: '24px 28px 0',
                                     display: 'flex',
+                                    justifyContent: 'center', /* CENTERED */
                                     alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '12px'
+                                    position: 'relative', zIndex: 2
                                 }}>
-                                    <span style={{ fontSize: '1.4rem', filter: 'drop-shadow(0 0 8px rgba(255,10,62,0.6))' }}>❤️</span>
-                                    <span>AI Blood Assistant</span>
-                                    <svg width="60" height="24" viewBox="0 0 60 24" fill="none" stroke="#ff0a3e" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 0 5px rgba(255,10,62,0.6))' }}>
-                                        <path d="M0 12h10l5-8 10 16 5-8h10l5-4 5 4h10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
+                                    <div style={{
+                                        fontSize: '1.5rem', fontWeight: '900', color: 'white',
+                                        lineHeight: '1.25', letterSpacing: '1px',
+                                        textTransform: 'uppercase', textAlign: 'center',
+                                        textShadow: '0 0 20px rgba(255, 10, 62, 0.5)',
+                                        fontFamily: "'Inter', sans-serif",
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '12px'
+                                    }}>
+                                        <span style={{ fontSize: '1.4rem', filter: 'drop-shadow(0 0 8px rgba(255,10,62,0.6))' }}>❤️</span>
+                                        <span>AI Blood Assistant</span>
+                                        <svg width="60" height="24" viewBox="0 0 60 24" fill="none" stroke="#ff0a3e" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 0 5px rgba(255,10,62,0.6))' }}>
+                                            <path d="M0 12h10l5-8 10 16 5-8h10l5-4 5 4h10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+
+                                        {/* Close Button */}
+                                        <button
+                                            onClick={() => setShowChatbot(false)}
+                                            style={{
+                                                position: 'absolute', right: '20px',
+                                                background: 'transparent', border: 'none',
+                                                color: 'rgba(255,255,255,0.6)', fontSize: '1.2rem',
+                                                cursor: 'pointer', display: 'flex', alignItems: 'center',
+                                                justifyContent: 'center', padding: '5px',
+                                                transition: 'color 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.color = 'white'}
+                                            onMouseLeave={(e) => e.target.style.color = 'rgba(255,255,255,0.6)'}
+                                            title="Close Assistant"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Robot Image Area */}
-                            <div style={{
-                                display: 'flex', justifyContent: 'center', alignItems: 'center',
-                                padding: '10px 0', position: 'relative', zIndex: 1,
-                                height: '220px', flexShrink: 0
-                            }}>
-                                <img
-                                    src="/ai_logo.png" alt="AI Assistant"
-                                    style={{
-                                        maxHeight: '200px', objectFit: 'contain',
-                                        filter: 'drop-shadow(0 0 25px rgba(255,10,62,0.35))',
-                                        borderRadius: '12px'
-                                    }}
-                                    onError={(e) => {
-                                        e.target.style.display = 'none';
-                                    }}
-                                />
-                                {/* REMOVED BANNER AS REQUESTED */}
-                            </div>
-
-                            {/* BloodAssistant Label */}
-                            <div style={{
-                                padding: '8px 24px',
-                                display: 'flex', alignItems: 'center', gap: '10px'
-                            }}>
+                                {/* Chat Area (fills remaining space) */}
                                 <div style={{
-                                    width: '28px', height: '28px', borderRadius: '50%',
-                                    background: '#10b981', boxShadow: '0 0 8px #10b981',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    overflow: 'hidden', flexShrink: 0
+                                    flex: 1, display: 'flex', flexDirection: 'column',
+                                    borderTop: '1px solid rgba(255,255,255,0.06)',
+                                    minHeight: 0
                                 }}>
-                                    <img src="/ai_logo.png" alt="AI" style={{
-                                        width: '100%', height: '100%', objectFit: 'cover'
-                                    }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerText = '🤖'; }} />
+                                    <ChatBot />
                                 </div>
-                                <span style={{
-                                    fontWeight: '700', color: 'white', fontSize: '0.95rem'
-                                }}>BloodAssistant</span>
-                            </div>
-
-                            {/* Chat Area (fills remaining space) */}
-                            <div style={{
-                                flex: 1, display: 'flex', flexDirection: 'column',
-                                borderTop: '1px solid rgba(255,255,255,0.06)',
-                                minHeight: 0
-                            }}>
-                                <ChatBot />
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
+
+            {/* Floating Chatbot Toggle Button / Checkbox */}
+            {!showChatbot && (
+                <button
+                    onClick={() => setShowChatbot(true)}
+                    style={{
+                        position: 'fixed', bottom: '30px', right: '30px', zIndex: 1000,
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                        background: 'rgba(10, 10, 10, 0.8)',
+                        color: 'white', fontWeight: '600', cursor: 'pointer', fontSize: '0.9rem',
+                        padding: '12px 20px', borderRadius: '30px',
+                        border: '1px solid rgba(255,10,62,0.3)',
+                        backdropFilter: 'blur(10px)', boxShadow: '0 5px 20px rgba(0,0,0,0.5)',
+                        transition: 'all 0.3s ease'
+                    }}
+                >
+                    💬 AI Assistant
+                </button>
+            )}
 
             {/* ===== CAMP FORM MODAL ===== */}
             {showCampForm && (

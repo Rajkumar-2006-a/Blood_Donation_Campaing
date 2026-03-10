@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Bot } from "lucide-react";
 import "./ROG.css";
 
 const ChatBot = () => {
@@ -76,7 +77,7 @@ const ChatBot = () => {
                         {(msg.sender === "bot" || msg.sender === "AI") && ( /* Handle both sender types */
                             <div style={{
                                 width: '36px', height: '36px', borderRadius: '50%',
-                                background: 'linear-gradient(135deg, #111, #222)', /* Elegant dark background */
+                                background: '#10b981', /* Green background matching the image */
                                 border: '1px solid rgba(255,255,255,0.1)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 overflow: 'hidden', flexShrink: 0, marginTop: '2px',
@@ -85,10 +86,10 @@ const ChatBot = () => {
                                 <img
                                     src="/ai_logo.png"
                                     alt="AI"
-                                    style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                     onError={(e) => {
+                                        // Hide image and fall back to plain green bubble if not found yet
                                         e.target.style.display = 'none';
-                                        e.target.parentElement.style.background = '#ff0a3e'; /* Fallback to red box if image fails */
                                     }}
                                 />
                             </div>
@@ -229,7 +230,7 @@ const ChatBot = () => {
                     40% { transform: scale(1); }
                 }
             `}</style>
-        </div>
+        </div >
     );
 };
 

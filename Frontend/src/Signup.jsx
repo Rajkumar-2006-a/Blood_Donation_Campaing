@@ -9,13 +9,18 @@ function Signup() {
         password: "",
         blood_group: "",
         phone: "",
-        city: ""
+        city: "",
+        is_donor: false
     });
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value, type, checked } = e.target;
+        setFormData({
+            ...formData,
+            [name]: type === 'checkbox' ? checked : value
+        });
     };
 
     const handleSignup = async (e) => {
@@ -112,6 +117,20 @@ function Signup() {
                                     <span className="input-line"></span>
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="form-group" style={{ marginTop: '15px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255, 255, 255, 0.8)' }}>
+                            <input
+                                type="checkbox"
+                                name="is_donor"
+                                id="is_donor"
+                                checked={formData.is_donor}
+                                onChange={handleChange}
+                                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#c0392b' }}
+                            />
+                            <label htmlFor="is_donor" style={{ cursor: 'pointer', fontSize: '15px' }}>
+                                Want to be a blood donor?
+                            </label>
                         </div>
 
                         {error && <div className="error-message show" style={{ marginBottom: '10px' }}>{error}</div>}
