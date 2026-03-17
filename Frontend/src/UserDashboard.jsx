@@ -1,7 +1,21 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import ChatBot from "./ChatBot";
+import { useTheme } from "./ThemeContext";
 import "./ROG.css";
+
+
+function DarkModeToggle() {
+    const { isDark, toggleTheme } = useTheme();
+    return (
+        <button className="dark-mode-toggle" onClick={toggleTheme} title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
+            <div className={`toggle-track ${isDark ? 'is-dark' : ''}`}>
+                <div className="toggle-knob">{isDark ? '🌙' : '☀️'}</div>
+            </div>
+            <span>{isDark ? 'DARK' : 'LIGHT'}</span>
+        </button>
+    );
+}
 
 function UserDashboard() {
     const [user, setUser] = useState(null);
@@ -17,6 +31,30 @@ function UserDashboard() {
         contact_mobile: ''
     });
     const navigate = useNavigate();
+    const { isDark } = useTheme();
+
+    // Theme-aware color tokens (used in inline styles)
+    const t = {
+        bg:         isDark ? '#050505' : '#f5f5f7',
+        navBg:      isDark ? 'rgba(5,5,5,0.8)' : 'rgba(255,255,255,0.92)',
+        navBorder:  isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.08)',
+        text:       isDark ? 'white' : '#1a1a2e',
+        subtle:     isDark ? '#9ca3af' : '#555577',
+        tamilMain:  isDark ? '#e5e5e5' : '#1a1a2e',
+        cardBg:     isDark ? 'linear-gradient(145deg, rgba(25,25,25,0.9), rgba(10,10,10,0.8))' : 'linear-gradient(145deg, rgba(255,255,255,0.95), rgba(240,240,245,0.9))',
+        cardBorder: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+        statNum:    isDark ? 'white' : '#1a1a2e',
+        statLabel:  isDark ? '#9ca3af' : '#555577',
+        logoutBorder: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
+        logoutColor:  isDark ? '#9ca3af' : '#555577',
+        modalBg:    isDark ? '#111' : '#ffffff',
+        modalBorder: isDark ? 'rgba(255,10,62,0.3)' : 'rgba(255,10,62,0.2)',
+        inputBg:    isDark ? '#0a0a0a' : '#f9f9fb',
+        inputColor: isDark ? 'white' : '#1a1a2e',
+        inputBorder: isDark ? '#333' : '#ddd',
+        cancelBorder: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+        cancelColor:  isDark ? '#9ca3af' : '#555577',
+    };
 
     // Generate Blood Rain Drops
     const drops = useMemo(() => {
@@ -84,7 +122,7 @@ function UserDashboard() {
 
     return (
         <div className="rog-dashboard-container" style={{
-            background: '#050505',
+            background: t.bg,
             backgroundImage: `
                 linear-gradient(rgba(255, 10, 62, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 10, 62, 0.03) 1px, transparent 1px)
@@ -135,28 +173,31 @@ function UserDashboard() {
 
             {/* ===== NAVBAR ===== */}
             <header className="rog-navbar" style={{
-                background: 'rgba(5,5,5,0.8)', backdropFilter: 'blur(12px)',
-                borderBottom: '1px solid rgba(255,255,255,0.05)'
+                background: t.navBg, backdropFilter: 'blur(12px)',
+                borderBottom: `1px solid ${t.navBorder}`
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{
                         width: '28px', height: '28px', background: 'var(--rog-red)',
                         borderRadius: '4px', boxShadow: '0 0 15px rgba(255,10,62,0.5)'
                     }} />
-                    <span style={{ fontSize: '1.15rem', fontWeight: '800', color: 'white', letterSpacing: '-0.5px' }}>
+                    <span style={{ fontSize: '1.15rem', fontWeight: '800', color: t.text, letterSpacing: '-0.5px' }}>
                         One <span style={{ color: 'var(--rog-red)' }}>Drop</span>
                     </span>
                 </div>
-                <button onClick={handleLogout} style={{
-                    background: 'transparent',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    color: '#9ca3af', padding: '8px 24px', fontSize: '0.75rem',
-                    fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1.5px',
-                    borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s',
-                    fontFamily: 'inherit'
-                }}>
-                    LOGOUT
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <DarkModeToggle />
+                    <button onClick={handleLogout} style={{
+                        background: 'transparent',
+                        border: `1px solid ${t.logoutBorder}`,
+                        color: t.logoutColor, padding: '8px 24px', fontSize: '0.75rem',
+                        fontWeight: '600', textTransform: 'uppercase', letterSpacing: '1.5px',
+                        borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s',
+                        fontFamily: 'inherit'
+                    }}>
+                        LOGOUT
+                    </button>
+                </div>
             </header>
 
             {/* ===== MAIN CONTENT ===== */}
@@ -180,7 +221,7 @@ function UserDashboard() {
 
                         {/* SUBTITLE */}
                         <p className="rog-marketing-sub" style={{
-                            fontSize: '1.25rem', color: '#9ca3af',
+                            fontSize: '1.25rem', color: t.subtle,
                             lineHeight: '1.8', marginBottom: '40px', maxWidth: '600px', margin: '0 0 40px 0'
                         }}>
                             Join the elite network of donors via One Drop. Your contribution powers the future of healthcare.
@@ -189,7 +230,7 @@ function UserDashboard() {
                         {/* TAMIL TEXT */}
                         <p className="rog-tamil-text" style={{
                             fontSize: '1.4rem', fontWeight: '700',
-                            lineHeight: '1.8', marginBottom: '80px', color: '#e5e5e5',
+                            lineHeight: '1.8', marginBottom: '80px', color: t.tamilMain,
                             margin: '0 0 80px 0'
                         }}>
                             <span style={{ color: '#ff0a3e', fontStyle: 'italic' }}>உங்கள் இரத்தம்,</span>{' '}
@@ -207,15 +248,15 @@ function UserDashboard() {
                                 { value: user.blood_group || 'B+', label: 'MY TYPE' }
                             ].map((stat, i) => (
                                 <div key={i} className="rog-stat-minimal" style={{
-                                    background: 'linear-gradient(145deg, rgba(25, 25, 25, 0.9), rgba(10, 10, 10, 0.8))',
+                                    background: t.cardBg,
                                     backdropFilter: 'blur(20px)',
-                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    border: `1px solid ${t.cardBorder}`,
                                     borderRadius: '16px',
-                                    width: '200px', height: '160px', /* Bigger boxes */
+                                    width: '200px', height: '160px',
                                     display: 'flex', flexDirection: 'column',
                                     justifyContent: 'center', alignItems: 'center',
                                     position: 'relative', overflow: 'hidden',
-                                    boxShadow: '0 10px 40px rgba(0,0,0,0.5)', /* Classy shadow */
+                                    boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.5)' : '0 4px 20px rgba(0,0,0,0.08)',
                                     transition: 'all 0.3s ease',
                                     cursor: 'default'
                                 }}>
@@ -231,14 +272,14 @@ function UserDashboard() {
                                         pointerEvents: 'none'
                                     }} />
                                     <div style={{
-                                        fontSize: '3.5rem', fontWeight: '800', color: 'white',
+                                        fontSize: '3.5rem', fontWeight: '800', color: t.statNum,
                                         lineHeight: '1', marginBottom: '10px',
-                                        textShadow: '0 0 20px rgba(255,10,62,0.3)'
+                                        textShadow: isDark ? '0 0 20px rgba(255,10,62,0.3)' : 'none'
                                     }}>{stat.value}</div>
                                     <div style={{
                                         fontSize: '0.9rem', fontWeight: '700',
                                         textTransform: 'uppercase', letterSpacing: '2px',
-                                        color: '#9ca3af'
+                                        color: t.statLabel
                                     }}>{stat.label}</div>
                                 </div>
                             ))}
@@ -248,14 +289,14 @@ function UserDashboard() {
                         <div className="rog-camp-text-section">
                             <h2 style={{
                                 fontSize: '1.4rem', fontWeight: '800',
-                                textTransform: 'uppercase', color: 'white',
+                                textTransform: 'uppercase', color: t.text,
                                 marginBottom: '10px', letterSpacing: '0.5px',
                                 margin: '0 0 10px 0'
                             }}>
                                 Organize a Blood Camp
                             </h2>
                             <p style={{
-                                fontSize: 'x-large', color: '#6b7280',
+                                fontSize: 'x-large', color: t.subtle,
                                 maxWidth: '1000px', lineHeight: '1.6',
                                 margin: '0 0 20px 0'
                             }}>
@@ -380,11 +421,11 @@ function UserDashboard() {
                     style={{
                         position: 'fixed', bottom: '30px', right: '30px', zIndex: 1000,
                         display: 'flex', alignItems: 'center', gap: '8px',
-                        background: 'rgba(10, 10, 10, 0.8)',
-                        color: 'white', fontWeight: '600', cursor: 'pointer', fontSize: '0.9rem',
+                        background: isDark ? 'rgba(10, 10, 10, 0.8)' : 'rgba(255,255,255,0.9)',
+                        color: t.text, fontWeight: '600', cursor: 'pointer', fontSize: '0.9rem',
                         padding: '12px 20px', borderRadius: '30px',
                         border: '1px solid rgba(255,10,62,0.3)',
-                        backdropFilter: 'blur(10px)', boxShadow: '0 5px 20px rgba(0,0,0,0.5)',
+                        backdropFilter: 'blur(10px)', boxShadow: '0 5px 20px rgba(0,0,0,0.3)',
                         transition: 'all 0.3s ease'
                     }}
                 >
@@ -400,12 +441,12 @@ function UserDashboard() {
                     zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
                     <div style={{
-                        background: '#111', border: '1px solid rgba(255,10,62,0.3)',
-                        borderRadius: '16px', padding: '36px', width: '500px', maxWidth: '900vw',
+                        background: t.modalBg, border: `1px solid ${t.modalBorder}`,
+                        borderRadius: '16px', padding: '36px', width: '500px', maxWidth: '90vw',
                         boxShadow: '0 0 50px rgba(255,10,62,0.1)'
                     }}>
                         <h3 style={{
-                            color: 'white', fontSize: 'medium', marginBottom: '24px',
+                            color: t.text, fontSize: 'medium', marginBottom: '24px',
                             fontWeight: '1000', margin: '0 0 24px 0'
                         }}>
                             🏥 Organize a Blood Camp
@@ -446,8 +487,8 @@ function UserDashboard() {
                                 }}>SUBMIT</button>
                                 <button type="button" onClick={() => setShowCampForm(false)} style={{
                                     flex: 1, background: 'transparent',
-                                    border: '1px solid rgba(255,255,255,0.15)',
-                                    color: '#9ca3af', padding: '12px', borderRadius: '8px',
+                                    border: `1px solid ${t.cancelBorder}`,
+                                    color: t.cancelColor, padding: '12px', borderRadius: '8px',
                                     fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer',
                                     fontFamily: 'inherit'
                                 }}>CANCEL</button>

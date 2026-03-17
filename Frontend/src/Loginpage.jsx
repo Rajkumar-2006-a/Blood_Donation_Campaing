@@ -2,13 +2,16 @@ import "./Loginpage.css";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useGoogleLogin } from '@react-oauth/google';
+import { useTheme } from "./ThemeContext";
 
 function Login() {
     // State
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { isDark, toggleTheme } = useTheme();
 
     const navigate = useNavigate();
+
 
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -103,6 +106,19 @@ function Login() {
 
     return (
         <div className="login-page-wrapper">
+            {/* Dark Mode Toggle - Fixed Top Right */}
+            <div className="login-theme-toggle">
+                <button
+                    onClick={toggleTheme}
+                    title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                    className="dark-mode-toggle"
+                >
+                    <div className={`toggle-track ${isDark ? 'is-dark' : ''}`}>
+                        <div className="toggle-knob">{isDark ? '🌙' : '☀️'}</div>
+                    </div>
+                    <span>{isDark ? 'DARK' : 'LIGHT'}</span>
+                </button>
+            </div>
             {/* Toast Container */}
             <div className="toast-container">
                 {toasts.map(toast => (

@@ -818,3 +818,119 @@
         opacity: 0;
     }
 }
+
+/* ============================================
+   LOGIN PAGE - LIGHT MODE OVERRIDES
+   ============================================ */
+
+[data-theme="light"] .login-page-wrapper {
+    background: linear-gradient(135deg, #f5f5f7 0%, #ffe8ec 100%);
+}
+
+[data-theme="light"] .login-card {
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.12),
+        0 0 0 1px rgba(255, 50, 50, 0.05);
+}
+
+[data-theme="light"] .login-card::before {
+    background: linear-gradient(90deg, transparent, #ff3333, transparent);
+}
+
+[data-theme="light"] .login-brand {
+    color: #1a1a2e;
+    text-shadow: none;
+}
+
+[data-theme="light"] .login-header h2 {
+    color: #1a1a2e;
+}
+
+[data-theme="light"] .login-header p {
+    color: #666;
+}
+
+[data-theme="light"] .input-wrapper input {
+    background: #f9f9fb;
+    border-color: #ddd;
+    color: #1a1a2e;
+}
+
+[data-theme="light"] .input-wrapper input:focus {
+    background: #ffffff;
+    border-color: #ff3333;
+    box-shadow: 0 0 0 3px rgba(255, 51, 51, 0.08),
+        0 4px 20px rgba(255, 51, 51, 0.05);
+}
+
+[data-theme="light"] .input-wrapper label {
+    color: #888;
+}
+
+[data-theme="light"] .custom-checkbox {
+    border-color: #ccc;
+}
+
+[data-theme="light"] .checkbox-label {
+    color: #666;
+}
+
+[data-theme="light"] .remember-wrapper:hover .checkbox-label {
+    color: #1a1a2e;
+}
+
+[data-theme="light"] .forgot-password {
+    color: #888;
+}
+
+[data-theme="light"] .social-btn {
+    background: #f0f0f5;
+    border-color: #ddd;
+    color: #1a1a2e;
+}
+
+[data-theme="light"] .social-btn:hover {
+    background: #e8e8f0;
+    border-color: #ff3333;
+}
+
+[data-theme="light"] .divider span {
+    background: #ffffff;
+    color: #888;
+}
+
+[data-theme="light"] .divider::before {
+    background: linear-gradient(90deg, transparent, #ddd, transparent);
+}
+
+[data-theme="light"] .signup-link p {
+    color: #666;
+}
+
+[data-theme="light"] .glow-orb-1 {
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.06), transparent 70%);
+}
+
+[data-theme="light"] .glow-orb-2 {
+    background: radial-gradient(circle, rgba(255, 51, 85, 0.05), transparent 70%);
+}
+
+[data-theme="light"] .glow-orb-3 {
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.03), transparent 70%);
+}
+
+[data-theme="light"] .toast {
+    background: rgba(255, 255, 255, 0.98);
+    border-color: #ddd;
+    color: #1a1a2e;
+}
+
+/* --- Login page dark mode toggle (fixed top-right) --- */
+.login-theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}

@@ -1,6 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "./ThemeContext";
 import "./ROG.css";
+
+function DarkModeToggle() {
+    const { isDark, toggleTheme } = useTheme();
+    return (
+        <button className="dark-mode-toggle" onClick={toggleTheme} title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
+            <div className={`toggle-track ${isDark ? 'is-dark' : ''}`}>
+                <div className="toggle-knob">{isDark ? '🌙' : '☀️'}</div>
+            </div>
+            <span>{isDark ? 'DARK' : 'LIGHT'}</span>
+        </button>
+    );
+}
 
 function AdminDashboard() {
     const [user, setUser] = useState(null);
@@ -250,9 +263,12 @@ function AdminDashboard() {
                         </span>
                     </div>
                 </div>
-                <button onClick={handleLogout} className="rog-btn-secondary">
-                    LOGOUT
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <DarkModeToggle />
+                    <button onClick={handleLogout} className="rog-btn-secondary">
+                        LOGOUT
+                    </button>
+                </div>
             </header>
 
             {/* --- HERO SECTION --- */}
