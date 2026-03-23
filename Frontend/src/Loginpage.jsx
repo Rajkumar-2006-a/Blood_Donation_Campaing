@@ -48,13 +48,11 @@ function Login() {
                 localStorage.setItem('user', JSON.stringify(data.user));
 
                 showToast('Login Successful!', 'success', 'Welcome');
-                setTimeout(() => {
-                    if (data.user.role === 'admin') {
-                        navigate('/admin');
-                    } else {
-                        navigate('/dashboard');
-                    }
-                }, 1500); // Wait for the animation to show
+                if (data.user.role === 'admin') {
+                    navigate('/admin');
+                } else {
+                    navigate('/dashboard');
+                }
             } else {
                 showToast(data.message || 'Login failed', 'error', 'Error');
             }
@@ -84,13 +82,11 @@ function Login() {
                     localStorage.setItem('user', JSON.stringify(data.user));
 
                     showToast('Google Login Successful!', 'success', 'Welcome');
-                    setTimeout(() => {
-                        if (data.user.role === 'admin') {
-                            navigate('/admin');
-                        } else {
-                            navigate('/dashboard');
-                        }
-                    }, 1500);
+                    if (data.user.role === 'admin') {
+                        navigate('/admin');
+                    } else {
+                        navigate('/dashboard');
+                    }
                 } else {
                     showToast(data.message || 'Google Login failed', 'error', 'Error');
                 }

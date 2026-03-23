@@ -1084,7 +1084,7 @@ body {
 
 [data-theme="light"] .rog-navbar,
 [data-theme="light"] header.rog-navbar {
-    background: rgb(60 182 227 / 92%) !important;
+    background: rgb(170 204 206 / 92%) !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
 }
 
