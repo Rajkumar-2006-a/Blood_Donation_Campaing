@@ -824,11 +824,11 @@
    ============================================ */
 
 [data-theme="light"] .login-page-wrapper {
-    background: linear-gradient(135deg, #f5f5f7 0%, #ffe8ec 100%);
+    background: linear-gradient(135deg, #3333e4 0%, #ffe8ec 100%);
 }
 
 [data-theme="light"] .login-card {
-    background: rgba(255, 255, 255, 0.97);
+    background: rgb(101 220 107 / 97%);
     border: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow:
         0 20px 40px rgba(0, 0, 0, 0.12),

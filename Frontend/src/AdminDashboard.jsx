@@ -329,10 +329,10 @@ function AdminDashboard() {
                                         style={{ width: `${unitsToPercent(item.units)}%` }}
                                     ></div>
                                 </div>
-                                <div style={{ fontSize: '0.9rem', color: '#ccc', fontWeight: '600' }}>{item.units} Units</div>
+                                <div style={{ fontSize: '0.9rem', color: 'var(--rog-text-dim)', fontWeight: '600' }}>{item.units} Units</div>
                             </div>
                         )) : (
-                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: '#666', padding: '20px' }}>No inventory data available.</div>
+                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--rog-text-dim)', padding: '20px' }}>No inventory data available.</div>
                         )}
                     </div>
                 </div>
@@ -353,10 +353,10 @@ function AdminDashboard() {
                                             {request.status}
                                         </span>
                                     </div>
-                                    <div style={{ fontSize: '0.9rem', color: '#999' }}>
+                                    <div style={{ fontSize: '0.9rem', color: 'var(--rog-text-dim)' }}>
                                         {new Date(request.camp_date).toLocaleDateString()} • {request.camp_time || 'Time TBD'} • {request.location}
                                     </div>
-                                    <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--rog-text-dim)', marginTop: '4px' }}>
                                         Contact: {request.contact_person}
                                     </div>
                                 </div>

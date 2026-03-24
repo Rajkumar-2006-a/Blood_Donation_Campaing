@@ -67,11 +67,63 @@ const aiController = {
           params.push(location);
         }
 
-        const [donors] = await db.query(query, params);
+        let [donors] = await db.query(query, params);
+
+        if (donors.length === 0 && location) {
+          // Fallback: Ask AI for district and nearby areas
+          const fallbackCompletion = await groq.chat.completions.create({
+            messages: [
+              {
+                role: "system",
+                content: "The user searched for blood donors in a specific location, but none were found. Provide the name of the District this location belongs to, and a list of up to 5 nearby major towns or areas in the same district. Return ONLY JSON format: {\"district\": \"District Name\", \"nearby\": [\"Area1\", \"Area2\"]}"
+              },
+              {
+                role: "user",
+                content: location
+              }
+            ],
+            model: "llama-3.1-8b-instant",
+            response_format: { type: "json_object" },
+          });
+
+          let fallbackData = {};
+          try {
+            fallbackData = JSON.parse(fallbackCompletion.choices[0]?.message?.content || "{}");
+          } catch (e) {
+            console.error("AI Fallback Parse Error:", e);
+          }
+
+          const searchLocations = [];
+          if (fallbackData.district) searchLocations.push(fallbackData.district);
+          if (Array.isArray(fallbackData.nearby)) searchLocations.push(...fallbackData.nearby);
+
+          if (searchLocations.length > 0) {
+            const placeholders = searchLocations.map(() => '?').join(',');
+            const fallbackQuery = `SELECT name, blood_group, location, contact FROM users WHERE blood_group=? AND location IN (${placeholders})`;
+            const fallbackParams = [blood_group, ...searchLocations];
+
+            const [fallbackDonors] = await db.query(fallbackQuery, fallbackParams);
+            donors = fallbackDonors;
+
+            if (donors.length > 0) {
+              const donorList = donors
+                .slice(0, 5)
+                .map(
+                  d =>
+                    `👤 ${d.name} (${d.blood_group})\n📍 ${d.location}\n📞 ${d.contact}`
+                )
+                .join("\n\n");
+
+              return res.json({
+                response_message: `🩸 No donors found in exact location '${location}'. However, we found ${donors.length} donor(s) in the ${fallbackData.district || 'nearby'} district / nearby areas:\n\n${donorList}`
+              });
+            }
+          }
+        }
 
         if (donors.length === 0) {
           return res.json({
-            response_message: "No donors found matching your request."
+            response_message: "No donors found matching your exact location or nearby districts."
           });
         }
 
