@@ -13,6 +13,7 @@ function Signup() {
         is_donor: false
     });
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -26,9 +27,10 @@ function Signup() {
     const handleSignup = async (e) => {
         e.preventDefault();
         setError("");
+        setIsLoading(true);
 
         try {
-            const response = await fetch('http://localhost:5001/api/auth/register', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -44,6 +46,8 @@ function Signup() {
             navigate("/login");
         } catch (err) {
             setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -135,8 +139,8 @@ function Signup() {
 
                         {error && <div className="error-message show" style={{ marginBottom: '10px' }}>{error}</div>}
 
-                        <button type="submit" className="login-btn btn">
-                            <span className="btn-text">Create Account</span>
+                        <button type="submit" className={`login-btn btn ${isLoading ? 'loading' : ''}`} disabled={isLoading}>
+                            <span className="btn-text">{isLoading ? 'Creating Account...' : 'Create Account'}</span>
                             <span className="btn-loader"></span>
                             <span className="btn-glow"></span>
                         </button>
