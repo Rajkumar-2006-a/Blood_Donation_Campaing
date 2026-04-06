@@ -54,7 +54,7 @@ function Signup() {
     return (
         <div className="login-page-wrapper">
             <div className="login-container">
-                <div className="login-card" style={{ width: '600px' }}>
+                <div className="login-card signup-card">
                     <div className="login-header">
                         <div className="logo-icon"></div>
                         <h2>Join Us</h2>
@@ -106,7 +106,7 @@ function Signup() {
                             </div>
                         </div>
 
-                        <div className="form-options_row" style={{ display: 'flex', gap: '10px' }}>
+                        <div className="form-options-row">
                             <div className="form-group" style={{ flex: 1 }}>
                                 <div className="input-wrapper">
                                     <input type="tel" name="phone" required value={formData.phone} onChange={handleChange} />

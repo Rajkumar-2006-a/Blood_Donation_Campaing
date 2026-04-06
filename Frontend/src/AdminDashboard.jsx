@@ -68,7 +68,7 @@ function AdminDashboard() {
 
     const loadCampRequests = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/camps');
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/camps`);
             if (!response.ok) throw new Error("API Error");
             const data = await response.json();
             setCampRequests(data);
@@ -85,7 +85,7 @@ function AdminDashboard() {
     const fetchAllDonors = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:5001/api/auth/users');
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/auth/users`);
             const data = await response.json();
             setSearchResults(data);
         } catch (error) {
@@ -111,7 +111,7 @@ function AdminDashboard() {
         setShowAttendanceModal(true);
         setCampDonors([]); // Clear previous
         try {
-            const response = await fetch(`http://localhost:5001/api/camps/${camp.id}/donors`);
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/camps/${camp.id}/donors`);
             if (response.ok) {
                 const data = await response.json();
                 setCampDonors(data);
@@ -126,7 +126,7 @@ function AdminDashboard() {
 
     const handleMarkAttendance = async (donorId, status) => {
         try {
-            const response = await fetch('http://localhost:5001/api/camps/attendance', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/camps/attendance`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -153,7 +153,7 @@ function AdminDashboard() {
 
     const loadInventory = async () => {
         try {
-            const response = await fetch('http://localhost:5001/api/inventory');
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/inventory`);
             if (!response.ok) throw new Error("API Error");
             const data = await response.json();
             setInventory(data);
@@ -175,7 +175,7 @@ function AdminDashboard() {
         setCampRequests(prev => prev.map(req => req.id === id ? { ...req, status } : req));
 
         try {
-            await fetch(`http://localhost:5001/api/camps/${id}`, {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/camps/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status })
@@ -190,7 +190,7 @@ function AdminDashboard() {
     const handleInventoryUpdate = async (e) => {
         e.preventDefault();
         try {
-            await fetch('http://localhost:5001/api/inventory/update', {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/inventory/update`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(inventoryForm)
@@ -473,7 +473,7 @@ function AdminDashboard() {
                                             onClick={async () => {
                                                 if (window.confirm(`Are you sure you want to delete donor ${donor.name}?`)) {
                                                     try {
-                                                        await fetch(`http://localhost:5001/api/auth/users/${donor.id}`, { method: 'DELETE' });
+                                                        await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/auth/users/${donor.id}`, { method: 'DELETE' });
                                                         showToast('Donor deleted successfully', 'success');
                                                         handleSearch(); // Reload list
                                                     } catch (err) {
